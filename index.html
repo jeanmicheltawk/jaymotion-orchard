@@ -233,8 +233,6 @@ async function sync(){if(!ckey||busy)return;busy=true;try{const r=await api('PUT
 async function unlock(v){ckey=v;try{const r=await api('GET');if(r.status===401){ckey='';return 'bad'}if(r.status===404){const r2=await api('PUT',S);if(!r2.ok)throw 0;apply(await r2.json())}else if(r.ok)apply(await r.json());else throw 0;try{localStorage.setItem('orchard.key',v)}catch(e){}setCloud('#8fd07a');return 'ok'}catch(e){ckey='';return 'off'}}
 function lock(msg){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}$('#gateErr').textContent=msg||'';$('#gate').classList.remove('off');$('#sheet').classList.remove('on');setTimeout(()=>$('#pass').focus(),300)}
 $('#gateForm').addEventListener('submit',async e=>{e.preventDefault();const v=$('#pass').value.trim().toLowerCase();if(!v)return;$('#gateErr').textContent='Opening…';const r=await unlock(v);if(r==='ok'){$('#pass').value='';$('#gateErr').textContent='';$('#gate').classList.add('off');render()}else{$('#gateErr').textContent=r==='bad'?'Wrong password.':'Can\'t connect. Check your internet.';const f=$('#gateForm');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake')}});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
-setInterval(()=>{if(document.visibilityState==='visible')sync()},12000);
 document.addEventListener('focusout',()=>setTimeout(()=>{if(later&&!editing()){later=false;render()}},50));
 
 /* render */
