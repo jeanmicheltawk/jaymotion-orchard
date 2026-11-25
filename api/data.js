@@ -1,15 +1,52 @@
-// Orchard cloud sync: one private JSON document in Vercel Blob, protected by a passcode.
+// Orchard shared sync: one private JSON document in Vercel Blob, protected by a shared password.
+// PUT merges the incoming copy with the stored one, so several people can edit at the same time.
 import { put, get } from '@vercel/blob';
 import { timingSafeEqual } from 'node:crypto';
 
 const PATH = 'orchard/data.json';
 
 function authorized(req) {
-  const pass = process.env.ORCHARD_PASS || '';
-  const given = String(req.headers['x-orchard-key'] || '');
+  const pass = (process.env.ORCHARD_PASS || '').trim().toLowerCase();
+  const given = String(req.headers['x-orchard-key'] || '').trim().toLowerCase();
   if (!pass || !given) return false;
   const a = Buffer.from(pass), b = Buffer.from(given);
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+async function readStore() {
+  const result = await get(PATH, { access: 'private', useCache: false });
+  if (!result) return null;
+  return JSON.parse(await new Response(result.stream).text());
+}
+
+const t = x => (x && x.u) || 0;
+const chk = x => (x && typeof x === 'object' ? x : { v: !!x, u: 0 });
+
+// Newest edit wins per idea, per business and per checklist item. Deletions are kept as tombstones.
+function merge(a, b) {
+  if (!a) return b;
+  const del = { ...(a.del || {}) };
+  for (const [id, ts] of Object.entries(b.del || {})) del[id] = Math.max(del[id] || 0, ts);
+  const pick = (x, y) => {
+    const m = new Map();
+    for (const item of [...(x || []), ...(y || [])]) {
+      if (!item || !item.id) continue;
+      const prev = m.get(item.id);
+      if (!prev || t(item) >= t(prev)) m.set(item.id, item);
+    }
+    return [...m.values()].filter(item => !(del[item.id] > t(item)));
+  };
+  const checks = {};
+  for (const src of [a.checks || {}, b.checks || {}]) {
+    for (const [fid, items] of Object.entries(src)) {
+      checks[fid] = checks[fid] || {};
+      for (const [k, raw] of Object.entries(items || {})) {
+        const c = chk(raw), prev = checks[fid][k];
+        if (!prev || c.u >= prev.u) checks[fid][k] = c;
+      }
+    }
+  }
+  return { v: 3, fields: pick(a.fields, b.fields), ideas: pick(a.ideas, b.ideas), checks, del, updatedAt: Date.now() };
 }
 
 export default async function handler(req, res) {
@@ -18,11 +55,9 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const result = await get(PATH, { access: 'private', useCache: false });
-      if (!result) return res.status(404).json({ error: 'empty' });
-      const text = await new Response(result.stream).text();
-      res.setHeader('Content-Type', 'application/json');
-      return res.status(200).send(text);
+      const data = await readStore();
+      if (!data) return res.status(404).json({ error: 'empty' });
+      return res.status(200).json(data);
     }
 
     if (req.method === 'PUT') {
@@ -30,14 +65,14 @@ export default async function handler(req, res) {
       if (!body || !Array.isArray(body.fields) || !Array.isArray(body.ideas)) {
         return res.status(400).json({ error: 'invalid data' });
       }
-      body.updatedAt = body.updatedAt || Date.now();
-      await put(PATH, JSON.stringify(body), {
+      const merged = merge(await readStore(), body);
+      await put(PATH, JSON.stringify(merged), {
         access: 'private',
         allowOverwrite: true,
         addRandomSuffix: false,
         contentType: 'application/json',
       });
-      return res.status(200).json({ ok: true, updatedAt: body.updatedAt });
+      return res.status(200).json(merged);
     }
 
     res.setHeader('Allow', 'GET, PUT');

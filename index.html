@@ -112,6 +112,16 @@ textarea.in{min-height:76px;resize:vertical}
 .sheet.on{transform:translate(-50%,0);visibility:visible;transition:transform .4s var(--ease)}
 .sheet h3{margin:0;font:400 28px/1 'Instrument Serif',serif}
 .sheet p{margin:0;color:var(--mute);font-size:14px}
+.gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:rgba(8,14,10,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .5s,visibility 0s .5s}
+.gate.off{opacity:0;visibility:hidden}
+.gate form{width:min(380px,100%);background:rgba(17,28,19,.95);border:1px solid var(--line);border-radius:26px;padding:26px 22px;display:grid;gap:14px;text-align:center;animation:rise .6s var(--ease)}
+.gate .logo{justify-content:center;font-size:22px}
+.gate h2{margin:0;font:400 34px/1.05 'Instrument Serif',serif}
+.gate p{margin:0;color:var(--mute);font-size:14px}
+.gate .in{text-align:center;font-size:18px;letter-spacing:.06em}
+.gate .err{color:#f0a27a;min-height:20px;font-size:14px;font-weight:700}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ink);color:#132015;border-radius:999px;padding:7px 7px 7px 16px;display:flex;gap:10px;align-items:center;font-weight:700;font-size:14px;transition:.35s var(--ease);z-index:11;max-width:calc(100% - 24px)}
 .toast.on{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 .toast button{border:0;background:#132015;color:var(--ink);border-radius:999px;padding:7px 13px;font-weight:700}
@@ -154,11 +164,18 @@ textarea.in{min-height:76px;resize:vertical}
   <p class="foot">Tap ★ to rate · tap ✓ to pick · tap an idea to edit or change its category<br><a href="https://jaymotion.tech" target="_blank" rel="noopener">made by Jay Motion</a></p>
 </main>
 
-<div class="sheet" id="sheet" role="dialog" aria-label="Cloud sync">
-  <h3>Cloud sync</h3>
-  <p id="cloudTxt">Enter your passcode to sync ideas between phone and laptop.</p>
-  <input class="in" id="pass" type="password" placeholder="Passcode" autocomplete="current-password">
-  <div class="acts"><button class="btn red" id="logout">Disconnect</button><span style="display:flex;gap:8px"><button class="btn" id="closeSheet">Close</button><button class="btn gold" id="connect">Connect</button></span></div>
+<div class="gate" id="gate"><form id="gateForm">
+  <div class="logo"><i><svg width="15" height="15" viewBox="0 0 32 32"><path d="M16 4c6 4 7 11 2 19-1 2-3 4-5 4 0-8 1-15 3-23z" fill="#16200f"/></svg></i><span>Orchard<b>.</b></span></div>
+  <h2>Enter the password</h2>
+  <p>Everyone with the password sees and edits the same ideas.</p>
+  <input class="in" id="pass" type="password" placeholder="Password" autocomplete="current-password" autocapitalize="off" aria-label="Password">
+  <div class="err" id="gateErr" role="alert"></div>
+  <button class="plant" type="submit">Open</button>
+</form></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Sync and businesses">
+  <h3>Shared ideas</h3>
+  <p id="cloudTxt">Synced. Everyone with the password sees the same ideas.</p>
+  <div class="acts"><button class="btn red" id="logout">Lock</button><button class="btn" id="closeSheet">Close</button></div>
   <div class="acts" style="border-top:1px solid var(--line);padding-top:10px"><button class="btn" id="newBiz">+ New business</button><button class="btn red" id="delBiz">Delete this business</button></div>
 </div>
 <div class="toast" id="toast"><span id="toastTxt"></span><button id="toastBtn">Undo</button></div>
@@ -192,22 +209,33 @@ function example(){
 }
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.fields||!S.ideas)S=example();
-function fix(){S.checks=S.checks||{};S.ideas.forEach(i=>{if(i.stars==null)i.stars=3;if(!CATS[i.cat])i.cat=guess(i.title)})}
+let cur='';try{cur=localStorage.getItem('orchard.cur')||''}catch(e){}
+const now=()=>Date.now(),touch=o=>{o.u=now();return o};
+const isOn=x=>x&&typeof x==='object'?!!x.v:!!x;
+function fix(){S.checks=S.checks||{};S.del=S.del||{};S.ideas.forEach(i=>{if(i.stars==null)i.stars=3;if(!CATS[i.cat])i.cat=guess(i.title)});if(!S.fields.length)S.fields.push(touch({id:'jounieh',name:'Jounieh restaurant'}))}
 function guess(t){t=(t||'').toLowerCase();if(/dj|night|music|event|party/.test(t))return'event';if(/vending|delivery|catering|machine/.test(t))return'addon';if(/insta|loyal|game|reel|ads?\b/.test(t))return'mkt';if(/shop|restaurant|bar|kitchen|cafe|café/.test(t))return'concept';if(/menu|burger|juice|salad|bowl|food|brunch/.test(t))return'food';return'other'}
 fix();
-let catF='',tab='all',openId=null,newId=null,saveT,pushT,ckey='';
+let catF='',tab='all',openId=null,newId=null,saveT,pushT,ckey='',later=false,busy=false;
 try{ckey=localStorage.getItem('orchard.key')||''}catch(e){}
 
-const field=()=>S.fields.find(f=>f.id===S.cur)||S.fields[0];
+const field=()=>S.fields.find(f=>f.id===cur)||S.fields[0];
+const setCur=id=>{cur=id;try{localStorage.setItem('orchard.cur',id)}catch(e){}};
 const mine=()=>S.ideas.filter(i=>i.field===field().id);
-function save(){S.updatedAt=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},150);if(ckey){setCloud('#efc56b');clearTimeout(pushT);pushT=setTimeout(push,1200)}}
+function keep(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){clearTimeout(saveT);saveT=setTimeout(keep,150);if(ckey){setCloud('#efc56b');clearTimeout(pushT);pushT=setTimeout(sync,700)}}
 
 /* cloud */
 function setCloud(c){$('#cloudBtn').style.setProperty('--c',c)}
 const api=(m,b)=>fetch('/api/data',{method:m,headers:{'x-orchard-key':ckey,'content-type':'application/json'},body:b?JSON.stringify(b):undefined,cache:'no-store'});
-async function push(){try{const r=await api('PUT',S);setCloud(r.ok?'#8fd07a':'#f0a27a')}catch(e){setCloud('#f0a27a')}}
-async function pull(first){if(!ckey){setCloud('#73836f');return}try{const r=await api('GET');if(r.status===401){setCloud('#f0a27a');return 'bad'}if(r.status===404){await push();return 'ok'}const d=await r.json();if(d.fields&&d.ideas&&(first||(d.updatedAt||0)>(S.updatedAt||0))){S=d;fix();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render()}else if((S.updatedAt||0)>(d.updatedAt||0))await push();setCloud('#8fd07a');return 'ok'}catch(e){setCloud('#f0a27a');return 'off'}}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!openId)pull()});
+const editing=()=>!!(openId||$('#name').isContentEditable||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.idea')));
+function apply(d){if(!d||!d.fields||!d.ideas)return;S=d;fix();keep();if(editing())later=true;else render()}
+async function sync(){if(!ckey||busy)return;busy=true;try{const r=await api('PUT',S);if(r.status===401){lock('Password changed. Enter it again.');return}if(!r.ok){setCloud('#f0a27a');return}apply(await r.json());setCloud('#8fd07a')}catch(e){setCloud('#f0a27a')}finally{busy=false}}
+async function unlock(v){ckey=v;try{const r=await api('GET');if(r.status===401){ckey='';return 'bad'}if(r.status===404){const r2=await api('PUT',S);if(!r2.ok)throw 0;apply(await r2.json())}else if(r.ok)apply(await r.json());else throw 0;try{localStorage.setItem('orchard.key',v)}catch(e){}setCloud('#8fd07a');return 'ok'}catch(e){ckey='';return 'off'}}
+function lock(msg){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}$('#gateErr').textContent=msg||'';$('#gate').classList.remove('off');$('#sheet').classList.remove('on');setTimeout(()=>$('#pass').focus(),300)}
+$('#gateForm').addEventListener('submit',async e=>{e.preventDefault();const v=$('#pass').value.trim().toLowerCase();if(!v)return;$('#gateErr').textContent='Opening…';const r=await unlock(v);if(r==='ok'){$('#pass').value='';$('#gateErr').textContent='';$('#gate').classList.add('off');render()}else{$('#gateErr').textContent=r==='bad'?'Wrong password.':'Can\'t connect. Check your internet.';const f=$('#gateForm');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake')}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
+setInterval(()=>{if(document.visibilityState==='visible')sync()},12000);
+document.addEventListener('focusout',()=>setTimeout(()=>{if(later&&!editing()){later=false;render()}},50));
 
 /* render */
 function render(){
@@ -216,13 +244,13 @@ function render(){
  $('#name').textContent=f.name;
  $('#count').innerHTML=`${L.length} idea${L.length===1?'':'s'} · <b>${P.length} picked</b>`;
  $('#pickN').textContent=`${P.length}/${MAX}`;
- const ck=S.checks[f.id]||{},total=CHECK.reduce((a,g)=>a+g[1].length,0),done=CHECK.reduce((a,g)=>a+g[1].filter(c=>ck[c[0]]).length,0),ready=Math.round(done/total*100);
+ const ck=S.checks[f.id]||{},total=CHECK.reduce((a,g)=>a+g[1].length,0),done=CHECK.reduce((a,g)=>a+g[1].filter(c=>isOn(ck[c[0]])).length,0),ready=Math.round(done/total*100);
  $('#sIdeas').textContent=L.length;$('#sPicked').textContent=`${P.length}/${MAX}`;$('#sReady').textContent=ready+'%';
  const mx=Math.max(1,...Object.keys(CATS).map(k=>L.filter(i=>i.cat===k).length));
  $('#cats').innerHTML=Object.entries(CATS).map(([k,[n,c]])=>{const v=L.filter(i=>i.cat===k).length;return `<button class="cb${catF&&catF!==k?' dim':''}" data-catf="${k}" style="--c:${c}" aria-label="Show ${n}"><span>${n}</span><span class="tr"><i data-w="${v/mx*100}"></i></span><b>${v}</b></button>`}).join('');
  requestAnimationFrame(()=>document.querySelectorAll('#cats i').forEach(e=>e.style.width=e.dataset.w+'%'));
  if(tab==='open'){$('#list').innerHTML=`<div class="dash" style="margin:0"><div class="sr"><b>Before you open</b><span style="color:var(--gold);font-weight:800">${done}/${total}</span></div><div class="prog"><i style="width:${ready}%"></i></div><small style="color:var(--dim)">Things people often forget. Tick them off as you go. Check the papers with a local accountant or lawyer.</small></div>`+
-  CHECK.map(([g,items])=>`<div class="group"><h3>${g}</h3>${items.map(([id,t,h])=>`<div class="chk${ck[id]?' on':''}" data-chk="${id}" role="checkbox" aria-checked="${!!ck[id]}" tabindex="0"><i>${ck[id]?'✓':''}</i><span>${esc(t)}${h?`<small>${esc(h)}</small>`:''}</span></div>`).join('')}</div>`).join('')+
+  CHECK.map(([g,items])=>`<div class="group"><h3>${g}</h3>${items.map(([id,t,h])=>`<div class="chk${isOn(ck[id])?' on':''}" data-chk="${id}" role="checkbox" aria-checked="${isOn(ck[id])}" tabindex="0"><i>${isOn(ck[id])?'✓':''}</i><span>${esc(t)}${h?`<small>${esc(h)}</small>`:''}</span></div>`).join('')}</div>`).join('')+
   `<div class="group"><h3>Ideas you might have missed</h3>${MISSED.filter(([t])=>!L.some(i=>i.title===t)).map(([t,c])=>`<div class="miss"><span>${esc(t)}</span><button class="btn" data-miss="${esc(t)}" data-cat="${c}">+ Add</button></div>`).join('')||'<p class="empty">You added them all.</p>'}</div>`;newId=null;return}
  $('#slots').innerHTML=Array.from({length:MAX},(_,k)=>`<i class="slot${k<P.length?' on':''}"></i>`).join('');
  $('#picked').innerHTML=P.map(i=>`<span>${esc(i.title)}</span>`).join('');
@@ -238,36 +266,35 @@ function render(){
 let tT,tFn;function toast(m,btn,fn){$('#toastTxt').textContent=m;$('#toastBtn').textContent=btn||'OK';tFn=fn;$('#toast').classList.add('on');clearTimeout(tT);tT=setTimeout(()=>$('#toast').classList.remove('on'),4500)}
 
 /* events */
-$('#addForm').addEventListener('submit',e=>{e.preventDefault();const v=$('#newIdea').value.trim();if(!v)return;const i={id:uid(),field:field().id,title:v,note:'',stars:3,cat:catF||guess(v),harvest:false,created:Date.now()};S.ideas.push(i);newId=i.id;setTab('all');$('#newIdea').value='';save();render()});
+$('#addForm').addEventListener('submit',e=>{e.preventDefault();const v=$('#newIdea').value.trim();if(!v)return;const i=touch({id:uid(),field:field().id,title:v,note:'',stars:3,cat:catF||guess(v),harvest:false,created:now()});S.ideas.push(i);newId=i.id;setTab('all');$('#newIdea').value='';save();render()});
 document.addEventListener('click',e=>{
  const t=e.target,card=t.closest('.idea'),i=card&&S.ideas.find(x=>x.id===card.dataset.id);
- const sc=t.closest('[data-setcat]');if(i&&sc){i.cat=sc.dataset.setcat;save();render();return}
+ const sc=t.closest('[data-setcat]');if(i&&sc){i.cat=sc.dataset.setcat;touch(i);save();render();return}
  const cf=t.closest('[data-catf]');if(cf){catF=catF===cf.dataset.catf?'':cf.dataset.catf;if(tab==='open')setTab('all');render();return}
- const ch=t.closest('[data-chk]');if(ch){const f=field().id;S.checks[f]=S.checks[f]||{};S.checks[f][ch.dataset.chk]=!S.checks[f][ch.dataset.chk];save();render();return}
- const ms=t.closest('[data-miss]');if(ms){const n={id:uid(),field:field().id,title:ms.dataset.miss,note:'',stars:3,cat:ms.dataset.cat,harvest:false,created:Date.now()};S.ideas.push(n);save();render();toast('Added to your ideas.','See it',()=>{setTab('all');newId=n.id;render()});return}
- if(i&&t.closest('[data-star]')){const n=+t.closest('[data-star]').dataset.star;i.stars=i.stars===n?n-1:n;save();render();return}
- if(i&&t.closest('[data-pick]')){if(!i.harvest&&mine().filter(x=>x.harvest).length>=MAX){toast('You already picked 6. Unpick one first.');return}i.harvest=!i.harvest;save();render();return}
- if(i&&t.closest('[data-del]')){const k=S.ideas.indexOf(i);S.ideas.splice(k,1);openId=null;save();render();toast('Idea deleted.','Undo',()=>{S.ideas.splice(k,0,i);save();render()});return}
- if(i&&t.closest('[data-open]')){openId=openId===i.id?null:i.id;render();if(openId)document.querySelector(`.idea[data-id="${CSS.escape(i.id)}"] .in`)?.focus();return}
+ const ch=t.closest('[data-chk]');if(ch){const f=field().id;S.checks[f]=S.checks[f]||{};S.checks[f][ch.dataset.chk]={v:!isOn(S.checks[f][ch.dataset.chk]),u:now()};save();render();return}
+ const ms=t.closest('[data-miss]');if(ms){const n=touch({id:uid(),field:field().id,title:ms.dataset.miss,note:'',stars:3,cat:ms.dataset.cat,harvest:false,created:now()});S.ideas.push(n);save();render();toast('Added to your ideas.','See it',()=>{setTab('all');newId=n.id;render()});return}
+ if(i&&t.closest('[data-star]')){const n=+t.closest('[data-star]').dataset.star;i.stars=i.stars===n?n-1:n;touch(i);save();render();return}
+ if(i&&t.closest('[data-pick]')){if(!i.harvest&&mine().filter(x=>x.harvest).length>=MAX){toast('You already picked 6. Unpick one first.');return}i.harvest=!i.harvest;touch(i);save();render();return}
+ if(i&&t.closest('[data-del]')){const k=S.ideas.indexOf(i);S.ideas.splice(k,1);S.del[i.id]=now();openId=null;save();render();toast('Idea deleted.','Undo',()=>{delete S.del[i.id];touch(i);S.ideas.push(i);save();render()});return}
+ if(i&&t.closest('[data-open]')){openId=openId===i.id?null:i.id;later=false;render();if(openId)document.querySelector(`.idea[data-id="${CSS.escape(i.id)}"] .in`)?.focus();return}
  const tb=t.closest('[data-tab]');if(tb){setTab(tb.dataset.tab);render();return}
  if(t.closest('#toastBtn')){$('#toast').classList.remove('on');tFn&&tFn();return}
- if(t.closest('#cloudBtn')){$('#cloudTxt').textContent=ckey?'Connected. Your ideas sync between your devices.':'Enter your passcode to sync ideas between phone and laptop.';$('#sheet').classList.toggle('on');return}
+ if(t.closest('#cloudBtn')){$('#sheet').classList.toggle('on');return}
  if(t.closest('#closeSheet')){$('#sheet').classList.remove('on');return}
- if(t.closest('#connect')){const v=$('#pass').value.trim();if(!v)return;ckey=v;setCloud('#efc56b');pull(true).then(r=>{if(r==='ok'){try{localStorage.setItem('orchard.key',v)}catch(e){}$('#pass').value='';$('#sheet').classList.remove('on');toast('Connected. Ideas now sync.')}else{ckey='';toast(r==='bad'?'Wrong passcode.':'Could not connect. Try again online.')}});return}
- if(t.closest('#logout')){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}setCloud('#73836f');$('#sheet').classList.remove('on');toast('Disconnected.');return}
- if(t.closest('#newBiz')){const f={id:uid(),name:'New business'};S.fields.push(f);S.cur=f.id;save();render();$('#sheet').classList.remove('on');renameBiz();return}
- if(t.closest('#delBiz')){if(S.fields.length<2){toast('Keep at least one business.');return}const snap=JSON.stringify(S),f=field();S.ideas=S.ideas.filter(x=>x.field!==f.id);S.fields=S.fields.filter(x=>x!==f);S.cur=S.fields[0].id;save();render();$('#sheet').classList.remove('on');toast(`Deleted “${f.name}”.`,'Undo',()=>{S=JSON.parse(snap);save();render()});return}
+ if(t.closest('#logout')){lock();return}
+ if(t.closest('#newBiz')){const f=touch({id:uid(),name:'New business'});S.fields.push(f);setCur(f.id);save();render();$('#sheet').classList.remove('on');renameBiz();return}
+ if(t.closest('#delBiz')){if(S.fields.length<2){toast('Keep at least one business.');return}const f=field(),gone=S.ideas.filter(x=>x.field===f.id),ts=now();gone.forEach(x=>S.del[x.id]=ts);S.del[f.id]=ts;S.ideas=S.ideas.filter(x=>x.field!==f.id);S.fields=S.fields.filter(x=>x!==f);setCur(S.fields[0].id);save();render();$('#sheet').classList.remove('on');toast(`Deleted “${f.name}”.`,'Undo',()=>{[f,...gone].forEach(x=>{delete S.del[x.id];touch(x)});S.fields.push(f);S.ideas.push(...gone);setCur(f.id);save();render()});return}
  if(t.closest('#name'))renameBiz();
 });
 function setTab(v){tab=v;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===v))}
 document.addEventListener('keydown',e=>{const c=e.target.closest&&e.target.closest('[data-chk]');if(c&&(e.key===' '||e.key==='Enter')){e.preventDefault();c.click()}});
 function renameBiz(){const h=$('#name');h.contentEditable='true';h.focus();const r=document.createRange();r.selectNodeContents(h);const s=getSelection();s.removeAllRanges();s.addRange(r)}
-$('#name').addEventListener('blur',e=>{e.target.contentEditable='false';field().name=e.target.textContent.trim()||'My business';save();render()});
+$('#name').addEventListener('blur',e=>{e.target.contentEditable='false';field().name=e.target.textContent.trim()||'My business';touch(field());save();later=false;render()});
 $('#name').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}});
 $('#name').title='Tap to rename';
-document.addEventListener('input',e=>{const t=e.target,card=t.closest('.idea');if(!card||!t.dataset.f)return;const i=S.ideas.find(x=>x.id===card.dataset.id);i[t.dataset.f]=t.value;if(t.dataset.f==='title')card.querySelector('.title').textContent=t.value;save()});
-$('#biz').addEventListener('change',e=>{S.cur=e.target.value;openId=null;save();render()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){openId=null;$('#sheet').classList.remove('on');render()}});
+document.addEventListener('input',e=>{const t=e.target,card=t.closest('.idea');if(!card||!t.dataset.f)return;const i=S.ideas.find(x=>x.id===card.dataset.id);if(!i)return;i[t.dataset.f]=t.value;touch(i);if(t.dataset.f==='title')card.querySelector('.title').textContent=t.value;save()});
+$('#biz').addEventListener('change',e=>{setCur(e.target.value);openId=null;render()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){openId=null;later=false;$('#sheet').classList.remove('on');render()}});
 
 /* background field */
 function drawBg(){const c=$('#bg'),W=innerWidth,H=innerHeight,d=Math.min(devicePixelRatio||1,2);c.width=W*d;c.height=H*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);let s=4321;const r=()=>(s=s*16807%2147483647)/2147483647;
@@ -275,7 +302,9 @@ function drawBg(){const c=$('#bg'),W=innerWidth,H=innerHeight,d=Math.min(deviceP
  for(let i=-1;i*bw<W+bw;i++)for(let j=-1;j*bh<H+bh;j++){const X=i*bw-(j%2)*30+7,Y=j*bh+7,w=bw-14,h=bh-14;x.save();x.beginPath();x.rect(X,Y,w,h);x.clip();x.fillStyle=pal[Math.floor(r()*pal.length)];x.fillRect(X,Y,w,h);x.translate(X+w/2,Y+h/2);x.rotate([0,.78,-.78,1.57][Math.floor(r()*4)]);for(let t=-200;t<200;t+=6){x.fillStyle='rgba(12,24,10,.45)';x.fillRect(-200,t,400,1.6);x.fillStyle='rgba(170,210,110,.15)';x.fillRect(-200,t+2,400,1.2)}x.restore()}
  for(let i=0;i<W*H/9000;i++){const px=r()*W,py=r()*H,rad=8+r()*12,g=x.createRadialGradient(px-rad*.4,py-rad*.4,1,px,py,rad);g.addColorStop(0,'#9cc46a');g.addColorStop(1,'#2a4a1c');x.fillStyle=g;x.beginPath();x.arc(px,py,rad,0,7);x.fill()}}
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(drawBg,200)});
-drawBg();render();pull();
+drawBg();fix();render();
+try{ckey=localStorage.getItem('orchard.key')||''}catch(e){}
+if(ckey){$('#gate').classList.add('off');setCloud('#efc56b');sync()}else lock();
 }
 </script>
 </body>
