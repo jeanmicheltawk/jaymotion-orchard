@@ -46,7 +46,9 @@ function merge(a, b) {
       }
     }
   }
-  return { v: 3, fields: pick(a.fields, b.fields), ideas: pick(a.ideas, b.ideas), checks, del, updatedAt: Date.now() };
+  const packs = { ...(a.packs || {}) };
+  for (const [k, ts] of Object.entries(b.packs || {})) packs[k] = Math.max(packs[k] || 0, ts);
+  return { v: 3, fields: pick(a.fields, b.fields), ideas: pick(a.ideas, b.ideas), checks, del, packs, updatedAt: Date.now() };
 }
 
 export default async function handler(req, res) {

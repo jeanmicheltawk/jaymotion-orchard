@@ -196,6 +196,25 @@ const CHECK=[
 ];
 const MISSED=[['Breakfast or weekend brunch','food'],['Kids menu','food'],['Loyalty card: 10th meal free','mkt'],['Catering for parties and events','addon'],['Family meal boxes','food'],['Packaging that keeps food good for delivery','addon'],['Outdoor seating with a view','concept'],['Lunch combo for offices nearby','food']];
 
+// Idea packs: added once to the shared data. Fixed ids + a done-flag mean deleted ones never come back.
+const PACKS={p2:{t:1795615600000,items:[
+ ['Sunset rooftop grill','Burgers and bowls on a rooftop facing Jounieh bay. Golden hour every evening.','concept'],
+ ['Open-kitchen chef counter','Guests sit at the counter and watch burgers get smashed and bowls get built.','concept'],
+ ['Pickup window on the highway','Order on WhatsApp, grab it from a window without parking. Made for Jounieh traffic.','concept'],
+ ['Summer food truck at the marina','Test the menu for one summer on a truck before signing a lease.','concept'],
+ ['Late-night window until 3 AM','A small window open late for the nightlife crowd coming out of the clubs.','concept'],
+ ['Build-your-own bowl bar','Pick a base, a protein, toppings and a sauce. Fast, healthy, endless combos.','concept'],
+ ['Zaatar brioche burger buns','A Lebanese twist: soft brioche baked with zaatar on top.','food'],
+ ['House sauce bar with toum','Five house sauces, from classic toum to spicy harra and smoky chipotle.','food'],
+ ['Halloumi and watermelon summer burger','Grilled halloumi, watermelon and mint. A summer special.','food'],
+ ['Shawarma-spiced chicken burger','Chicken thigh in shawarma spices, pickles, toum and fries inside.','food'],
+ ['Kaak breakfast sandwiches','Street kaak filled with eggs, cheese and halloumi, from 7 AM.','food'],
+ ['Açaí with ashta, pistachio and honey','A Lebanese açaí bowl: ashta cream, crushed pistachio and local honey.','food'],
+ ['Jallab slush and mint lemonade','Frozen jallab with pine nuts and a fresh mint lemonade for summer.','food'],
+ ['Post-gym protein shakes','Peanut butter, banana and oat shakes with whey, for the gyms nearby.','food'],
+ ['Cold-pressed ginger and lemon shots','Small wellness shots at the counter, an easy add-on to every order.','food']
+]}};
+function applyPacks(){S.packs=S.packs||{};let added=0;for(const[k,pk]of Object.entries(PACKS)){if(S.packs[k])continue;const f=S.fields.find(x=>x.id==='jounieh')||S.fields[0];pk.items.forEach(([title,note,cat],n)=>{const id=k+'-'+n;if(S.del[id]||S.ideas.some(i=>i.id===id))return;S.ideas.push({id,field:f.id,title,note,cat,stars:3,harvest:false,created:pk.t+n,u:pk.t});added++});S.packs[k]=pk.t}return added}
 function example(){
  const f={id:'jounieh',name:'Jounieh restaurant'};
  const d=(title,note,stars,cat)=>({id:uid(),field:f.id,title,note,stars,cat,harvest:false,created:Date.now()-Math.random()*1e8});
@@ -228,7 +247,7 @@ function save(){clearTimeout(saveT);saveT=setTimeout(keep,150);if(ckey){setCloud
 function setCloud(c){$('#cloudBtn').style.setProperty('--c',c)}
 const api=(m,b)=>fetch('/api/data',{method:m,headers:{'x-orchard-key':ckey,'content-type':'application/json'},body:b?JSON.stringify(b):undefined,cache:'no-store'});
 const editing=()=>!!(openId||$('#name').isContentEditable||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.idea')));
-function apply(d){if(!d||!d.fields||!d.ideas)return;S=d;fix();keep();if(editing())later=true;else render()}
+function apply(d){if(!d||!d.fields||!d.ideas)return;S=d;fix();{const n=applyPacks();if(n){save();toast(`${n} new ideas added. Delete the ones you don't like.`)}}keep();if(editing())later=true;else render()}
 async function sync(){if(!ckey||busy)return;busy=true;try{const r=await api('PUT',S);if(r.status===401){lock('Password changed. Enter it again.');return}if(!r.ok){setCloud('#f0a27a');return}apply(await r.json());setCloud('#8fd07a')}catch(e){setCloud('#f0a27a')}finally{busy=false}}
 async function unlock(v){ckey=v;try{const r=await api('GET');if(r.status===401){ckey='';return 'bad'}if(r.status===404){const r2=await api('PUT',S);if(!r2.ok)throw 0;apply(await r2.json())}else if(r.ok)apply(await r.json());else throw 0;try{localStorage.setItem('orchard.key',v)}catch(e){}setCloud('#8fd07a');return 'ok'}catch(e){ckey='';return 'off'}}
 function lock(msg){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}$('#gateErr').textContent=msg||'';$('#gate').classList.remove('off');$('#sheet').classList.remove('on');setTimeout(()=>$('#pass').focus(),300)}
