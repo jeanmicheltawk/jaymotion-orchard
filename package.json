@@ -1,0 +1,10 @@
+{
+  "name": "jaymotion-orchard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Orchard: an idea OS to plant, score, duel and harvest business ideas. By Jay Motion.",
+  "dependencies": {
+    "@vercel/blob": "2.9.0"
+  }
+}

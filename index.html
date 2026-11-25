@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c140e">
+<title>Orchard Idea OS</title>
+<meta name="description" content="Orchard: plant every business idea, score it, duel it, and harvest the best into your final shop. By Jay Motion.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23efc56b'/%3E%3Cpath d='M16 7c5 3 6 9 2 15-1 2-3 3-4 3 0-6 1-12 2-18z' fill='%230c140e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday tool, calm and premium, like an estate manager's OS
+   IDEA ideas are vines on an aerial estate: planted, ripened, harvested
+   PICTURE the aerial field itself (canvas), glass panels floating above it
+   COLOUR deep vine green ground, glass olive panels, warm harvest gold accent
+   TYPE Instrument Serif for big names + Manrope for UI
+   LAYOUT icon rail + top bar; dashboard grid; phone: bottom tabs, one column */
+:root{color-scheme:dark;--bg:#0c140e;--panel:rgba(20,33,22,.74);--panel2:rgba(255,255,255,.045);--line:rgba(255,255,255,.09);--ink:#eef2e8;--mute:#a3b39f;--dim:#73836f;--gold:#efc56b;--gold2:#f7dfa3;--leaf:#8fd07a;--sprout:#bfe39a;--seed:#b9c3ad;--warn:#f0a27a;--r:22px;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Manrope,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+#field{position:fixed;inset:0;width:100%;height:100%;transition:filter .9s var(--ease),transform 1.2s var(--ease);filter:brightness(.42) saturate(.9) blur(3px);transform:scale(1.04)}
+body.v-field #field{filter:none;transform:scale(1)}
+.veil{position:fixed;inset:0;background:radial-gradient(120% 90% at 70% 10%,rgba(12,20,14,.1),rgba(8,14,10,.75));pointer-events:none;transition:opacity .9s}
+body.v-field .veil{opacity:.25}
+.app{position:relative;display:grid;grid-template-columns:76px minmax(0,1fr);height:100%}
+.rail{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 0;margin:14px 0 14px 14px;background:var(--panel);border:1px solid var(--line);border-radius:28px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:5}
+.rail .tab{width:46px;height:46px;border-radius:15px;border:0;background:transparent;color:var(--mute);display:grid;place-items:center;position:relative;transition:.25s}
+.rail .tab:hover{background:var(--panel2);color:var(--ink)}
+.rail .tab.on{background:var(--gold);color:#16200f;box-shadow:0 6px 24px rgba(239,197,107,.35)}
+.tab svg{width:21px;height:21px}
+.tab span{display:none}
+.rail .spacer{flex:1}
+.rail .credit{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;color:var(--dim);letter-spacing:.04em;text-decoration:none}
+.main{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.top{display:flex;align-items:center;gap:12px;padding:16px clamp(14px,2.4vw,28px) 10px;z-index:4}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.logo i{width:30px;height:30px;border-radius:10px;background:var(--gold);display:grid;place-items:center}
+.logo b{color:var(--gold)}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.fieldsel{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px}
+.fieldsel select{background:transparent;border:0;font-weight:700;font-size:15px;max-width:220px;outline:none}
+.fieldsel select option{background:#132015}
+.top .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:700;transition:transform .2s,background .2s}
+.btn:hover{background:rgba(255,255,255,.1)}
+.btn:active{transform:scale(.96)}
+.btn.gold{background:var(--gold);border-color:transparent;color:#16200f}
+.btn.gold:hover{background:var(--gold2)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:13px}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--warn)}
+.me{display:flex;align-items:center;gap:10px;padding:5px 16px 5px 5px}
+.me .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(140deg,var(--gold2),var(--gold));color:#3b2b0b;display:grid;place-items:center;font-weight:800;font-size:13px}
+.me small{display:block;color:var(--mute);font-size:12px;line-height:1.1}
+.me b{font-size:14px;line-height:1.2}
+.views{position:relative;flex:1;overflow:hidden}
+.view{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:8px clamp(14px,2.4vw,28px) 40px;opacity:0;visibility:hidden;transform:translateY(16px);transition:opacity .45s var(--ease),transform .55s var(--ease),visibility 0s .45s}
+.view.on{opacity:1;visibility:visible;transform:none;transition:opacity .45s var(--ease),transform .55s var(--ease)}
+.hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin:6px 0 18px}
+.hero h1{font:400 clamp(38px,5vw,60px)/1 'Instrument Serif',serif;margin:0;letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p{margin:6px 0 0;color:var(--mute);max-width:60ch}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:relative;overflow:hidden}
+.card h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.card .sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.kpi{min-height:190px;display:flex;flex-direction:column}
+.kpi .lbl{display:flex;justify-content:space-between;color:var(--mute);font-size:14px}
+.kpi .val{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:6px}
+.kpi .num{font-size:clamp(34px,3.4vw,44px);font-weight:600;letter-spacing:-.03em;line-height:1}
+.kpi .num small{font-size:16px;color:var(--mute);margin-left:4px;font-weight:500}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;background:rgba(239,197,107,.16);color:var(--gold);font-size:12.5px;font-weight:700;white-space:nowrap}
+.tag.green{background:rgba(143,208,122,.15);color:var(--leaf)}
+.tag.grey{background:rgba(255,255,255,.08);color:var(--mute)}
+.tag.warn{background:rgba(240,162,122,.15);color:var(--warn)}
+.kpi .viz{margin-top:auto;height:78px;position:relative}
+.kpi .viz svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.draw{stroke-dasharray:var(--len,600);stroke-dashoffset:var(--len,600);animation:draw 1.4s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.lolli{display:flex;align-items:flex-end;justify-content:space-around;height:100%;border-top:1px dashed rgba(255,255,255,.14);padding-top:4px}
+.lolli div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--mute)}
+.lolli i{display:block;width:3px;border-radius:3px;background:linear-gradient(var(--c),rgba(255,255,255,.15));height:0;transition:height 1s var(--ease);position:relative}
+.lolli i::before{content:"";position:absolute;top:-5px;left:-4px;width:11px;height:11px;border-radius:50%;background:var(--c)}
+.gauge{display:grid;place-items:center;gap:4px}
+.gauge svg{position:static;width:min(190px,100%);height:auto}
+.row2{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);margin-top:14px}
+.row3{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);margin-top:14px}
+.rank{display:grid;gap:6px}
+.rank .it{display:grid;grid-template-columns:26px minmax(0,1fr) 120px 40px;align-items:center;gap:10px;padding:9px 10px;border-radius:14px;background:var(--panel2);border:0;text-align:left;width:100%}
+.rank .it:hover{background:rgba(255,255,255,.08)}
+.rank .n{color:var(--dim);font-weight:700;font-size:13px}
+.rank .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--leaf),var(--gold));transition:width 1s var(--ease)}
+.rank .s{font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.donut{display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;align-items:center}
+.legend{display:grid;gap:7px;font-size:13px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend i{width:9px;height:9px;border-radius:50%;flex:none}
+.legend b{margin-left:auto;font-variant-numeric:tabular-nums}
+.bars{display:flex;align-items:flex-end;gap:8px;height:170px;padding-top:10px}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%;border:0;background:none;padding:0}
+.bars .b i{width:100%;max-width:16px;border-radius:9px;background:rgba(255,255,255,.75);height:0;transition:height 1.1s var(--ease)}
+.bars .b.h i{background:var(--gold)}
+.bars .b span{font-size:11px;color:var(--dim);max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.coach{display:grid;gap:10px}
+.tip{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:var(--panel2);font-size:14px}
+.tip .ic{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(239,197,107,.16);color:var(--gold);font-weight:800}
+.tip.warn .ic{background:rgba(240,162,122,.16);color:var(--warn)}
+.tip button{margin-top:6px}
+/* field */
+.pins{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .5s}
+body.v-field .pins{opacity:1}
+.pin{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;animation:drop .7s var(--ease) both}
+@keyframes drop{from{opacity:0;transform:translate(-50%,-160%)}to{opacity:1;transform:translate(-50%,-100%)}}
+.pin .lab{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:999px;background:rgba(14,22,15,.82);border:1px solid var(--line);font-size:12.5px;font-weight:700;white-space:nowrap;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .2s}
+.pin .lab i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.pin .lab em{font-style:normal;color:var(--mute);font-weight:500}
+.pins.compact .pin .lab{font-size:11.5px;padding:5px 10px 5px 7px}
+.pins.compact .pin .stem{height:14px}
+.pin.h .lab{background:var(--gold);color:#16200f;border-color:transparent}
+.pin.h .lab em{color:#5a4413}
+.pin .stem{width:2px;height:26px;background:rgba(255,255,255,.75)}
+.pin .dot{width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.22)}
+.pin.h .dot{background:var(--gold);animation:glow 2s infinite}
+@keyframes glow{50%{box-shadow:0 0 0 10px rgba(239,197,107,.15)}}
+.pin:hover .lab{transform:translateY(-3px) scale(1.04)}
+.fieldbar{position:absolute;left:clamp(14px,2.4vw,28px);right:clamp(14px,2.4vw,28px);bottom:22px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;pointer-events:none}
+.fieldbar>*{pointer-events:auto}
+.fieldbar .pill{padding:10px 16px;display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.fieldbar .pill span{display:flex;align-items:center;gap:6px}
+.fieldbar .pill i{width:8px;height:8px;border-radius:50%}
+.fieldtitle{font:400 clamp(40px,6vw,76px)/.95 'Instrument Serif',serif;text-shadow:0 4px 30px rgba(0,0,0,.4)}
+.fieldtitle small{display:block;font:500 15px/1.4 Manrope,sans-serif;color:rgba(238,242,232,.8);margin-top:8px}
+/* ideas */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-size:13.5px;transition:.2s}
+.chip.on{background:var(--ink);color:#132015;border-color:transparent}
+.search{display:flex;align-items:center;gap:8px;padding:0 14px;min-height:42px;flex:1 1 200px;max-width:320px}
+.search input{background:none;border:0;outline:none;width:100%;font-size:16px}
+.sel{min-height:42px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:600}
+.sel option{background:#132015}
+.cards{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.icard{cursor:pointer;display:flex;flex-direction:column;gap:12px;transition:transform .25s var(--ease),border-color .25s;animation:rise .6s var(--ease) both}
+.icard:hover{transform:translateY(-4px);border-color:rgba(239,197,107,.4)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.icard .hd{display:flex;gap:12px;align-items:flex-start}
+.icard h4{margin:0;font-size:17px;line-height:1.25;letter-spacing:-.01em;flex:1}
+.icard p{margin:0;color:var(--mute);font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ring{flex:none;width:52px;height:52px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:15px}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.crit{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.crit div{display:flex;flex-direction:column;gap:4px;font-size:10.5px;color:var(--dim);text-align:center}
+.crit i{height:28px;border-radius:6px;background:rgba(255,255,255,.07);position:relative;overflow:hidden}
+.crit i::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--h);background:linear-gradient(var(--gold),rgba(143,208,122,.7));border-radius:6px}
+.money{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);border-top:1px solid var(--line);padding-top:10px}
+.money b{color:var(--ink);white-space:nowrap}
+.star{flex:none;width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;color:var(--mute);transition:.2s}
+.star.on{background:var(--gold);color:#16200f;border-color:transparent}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+/* duel */
+.duel{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);gap:14px;align-items:stretch}
+.dcard{min-height:300px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:12px;transition:transform .35s var(--ease),opacity .35s,border-color .2s;font:inherit}
+.dcard:hover{border-color:var(--gold);transform:translateY(-4px)}
+.dcard h4{font:400 clamp(28px,3vw,40px)/1.05 'Instrument Serif',serif;margin:0}
+.dcard p{margin:0;color:var(--mute)}
+.dcard.win{transform:scale(1.04);border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.dcard.lose{opacity:.25;transform:scale(.95)}
+.vs{display:grid;place-items:center}
+.vs b{width:56px;height:56px;border-radius:50%;background:var(--gold);color:#16200f;display:grid;place-items:center;font-weight:800}
+.dq{font:400 clamp(24px,3vw,34px)/1.1 'Instrument Serif',serif;margin:0 0 14px}
+/* harvest */
+.hv{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start}
+.plist{display:grid;gap:6px}
+.prow{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:var(--panel2);transition:background .2s}
+.prow.on{background:rgba(239,197,107,.12)}
+.prow .t{font-weight:600}
+.prow small{display:block;color:var(--dim);font-size:12px}
+.prow .s{font-weight:800;font-variant-numeric:tabular-nums}
+.blue{background:linear-gradient(160deg,rgba(40,58,30,.92),rgba(18,30,20,.92))}
+.shopname{font:400 clamp(34px,4vw,52px)/1 'Instrument Serif',serif;background:none;border:0;border-bottom:1px dashed rgba(255,255,255,.2);width:100%;outline:none;padding:4px 0 8px}
+.shopname:focus{border-color:var(--gold)}
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.totals div{padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.18)}
+.totals small{color:var(--mute);font-size:12.5px;display:block}
+.totals b{font-size:24px;letter-spacing:-.02em;white-space:nowrap}
+.phase{margin-top:12px}
+.phase h5{margin:0 0 6px;font-size:13px;color:var(--gold);font-weight:700}
+.phase ol{margin:0;padding-left:20px;display:grid;gap:4px}
+.weights{display:grid;gap:12px}
+.wrow{display:grid;grid-template-columns:110px minmax(0,1fr) 28px;gap:12px;align-items:center;font-size:14px}
+.wrow b{text-align:right;color:var(--gold)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(90deg,var(--gold) var(--p,50%),rgba(255,255,255,.12) var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;margin-top:-8px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:rgba(255,255,255,.12)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--gold)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff}
+/* drawer & modal */
+.scrim{position:fixed;inset:0;background:rgba(4,8,5,.55);opacity:0;pointer-events:none;transition:opacity .35s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:12px;right:12px;bottom:12px;width:min(520px,calc(100% - 24px));background:rgba(17,28,19,.96);border:1px solid var(--line);border-radius:26px;z-index:21;transform:translateX(110%);transition:transform .5s var(--ease);display:flex;flex-direction:column;overflow:hidden}
+.drawer.on{transform:none}
+.dhead{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dbody{overflow-y:auto;padding:18px;display:grid;gap:18px}
+.fld{display:grid;gap:6px}
+.fld>label,.fld>span{font-size:13px;color:var(--mute);font-weight:600}
+.in{width:100%;min-height:44px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:16px;outline:none;transition:border-color .2s}
+.in:focus{border-color:var(--gold)}
+textarea.in{min-height:90px;resize:vertical;line-height:1.45}
+.ttl{font:400 32px/1.1 'Instrument Serif',serif;border:0;background:none;padding:0;min-height:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:38px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:13.5px;font-weight:600}
+.seg button.on{background:var(--gold);color:#16200f;border-color:transparent}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pips{display:grid;gap:10px}
+.pip{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.pip small{grid-column:1/-1;color:var(--dim);font-size:12px;margin-top:-4px}
+.pip .dots{display:flex;gap:5px}
+.pip .dots button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:13px;color:var(--mute);transition:.15s}
+.pip .dots button.on{background:var(--gold);color:#16200f;border-color:transparent}
+.qa{display:grid;gap:10px}
+.qa .q{font-size:14px;font-weight:600}
+.live{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:rgba(239,197,107,.08)}
+.live .ring{width:64px;height:64px}
+.live b.big{font-size:22px}
+.modal{position:fixed;left:50%;top:50%;width:min(520px,calc(100% - 24px));transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;transition:.4s var(--ease);z-index:22;background:rgba(17,28,19,.97);border:1px solid var(--line);border-radius:26px;padding:22px;display:grid;gap:14px}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.modal h2{margin:0;font:400 34px/1 'Instrument Serif',serif}
+.mic{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;flex:none}
+.mic.rec{background:var(--warn);color:#2a1206;animation:glow 1.2s infinite}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);opacity:0;pointer-events:none;background:var(--ink);color:#132015;border-radius:999px;padding:8px 8px 8px 18px;display:flex;align-items:center;gap:12px;font-weight:700;z-index:30;transition:transform .45s var(--ease),opacity .3s;max-width:calc(100% - 24px)}
+@media(max-width:900px){#sync{display:none}}
+.toast.on{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.toast button{background:#132015;color:var(--ink);border:0;border-radius:999px;min-height:36px;padding:0 14px;font-weight:700}
+.seedfx{position:fixed;width:14px;height:14px;border-radius:50% 50% 50% 0;background:var(--gold);z-index:40;pointer-events:none}
+.note{font-size:12.5px;color:var(--dim)}
+.bk{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:1100px){.row2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.row2>:first-child{grid-column:1/-1}.row3,.hv{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:720px){
+.app{grid-template-columns:minmax(0,1fr)}
+.rail{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));top:auto;margin:0;flex-direction:row;justify-content:space-around;padding:6px;border-radius:24px;gap:2px}
+.rail .spacer,.rail .credit{display:none}
+.rail .tab{width:auto;flex:1;height:52px;display:flex;flex-direction:column;gap:2px;font-size:10.5px;font-weight:700}
+.tab span{display:block}
+.rail .tab svg{width:19px;height:19px}
+.top{padding-top:calc(12px + env(safe-area-inset-top,0px));gap:8px}
+.me div,.logo .word{display:none}
+.me{padding:4px}
+.addtxt{display:none}
+.btn.gold.add{padding:0 14px}
+.view{padding-bottom:110px}
+.row2{grid-template-columns:minmax(0,1fr)}
+.duel{grid-template-columns:minmax(0,1fr)}
+.vs{height:40px}.vs b{width:44px;height:44px;font-size:13px}
+.dcard{min-height:0}
+.fieldbar{bottom:96px}
+.drawer{top:auto;left:0;right:0;bottom:0;width:100%;height:92%;border-radius:26px 26px 0 0;transform:translateY(105%)}
+.rank .it{grid-template-columns:22px minmax(0,1fr) 60px 34px}
+.donut{grid-template-columns:110px minmax(0,1fr)}
+.crit div{font-size:9.5px}
+.toast{bottom:96px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="v-overview">
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="veil"></div>
+<div class="pins" id="pins"></div>
+
+<div class="app">
+  <nav class="rail" aria-label="Sections">
+    <button class="tab" data-go="overview" title="Overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Overview</span></button>
+    <button class="tab" data-go="field" title="Field map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span>Field</span></button>
+    <button class="tab" data-go="ideas" title="All ideas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21c0-6 0-9 0-12"/><path d="M12 12c-4 0-7-3-7-7 4 0 7 3 7 7z"/><path d="M12 9c0-4 3-6 7-6 0 4-3 6-7 6z"/></svg><span>Ideas</span></button>
+    <button class="tab" data-go="duel" title="Duel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20l7-7M14 4h6v6L9 21l-6-6z"/></svg><span>Duel</span></button>
+    <button class="tab" data-go="harvest" title="Harvest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h16l-2 10H6z"/><path d="M8 10l4-6 4 6"/></svg><span>Harvest</span></button>
+    <button class="tab" data-go="backup" title="Fields and backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg><span>Backup</span></button>
+    <div class="spacer"></div>
+    <a class="credit" href="https://jaymotion.tech" target="_blank" rel="noopener">by Jay Motion</a>
+  </nav>
+
+  <div class="main">
+    <header class="top">
+      <div class="logo"><i><svg width="16" height="16" viewBox="0 0 32 32"><path d="M16 4c6 4 7 11 2 19-1 2-3 4-5 4 0-8 1-15 3-23z" fill="#16200f"/></svg></i><span class="word">Orchard<b>.</b></span></div>
+      <div class="pill fieldsel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--gold)"><path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><select id="fieldSel" aria-label="Business"></select></div>
+      <div class="grow"></div>
+      <span class="tag grey" id="sync" role="status">Saved on this device</span>
+      <button class="btn gold add" id="addBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg><span class="addtxt">Plant idea</span></button>
+      <div class="pill me"><span class="av">JM</span><div><b>Jean Michel</b><small>Founder</small></div></div>
+    </header>
+
+    <div class="views">
+      <!-- OVERVIEW -->
+      <section class="view" id="v-overview">
+        <div class="hero"><div><h1 id="ovTitle">Field overview</h1><p id="ovSub"></p></div><span class="note">Costs and profits are draft guesses. Tap any idea to change them.</span></div>
+        <div class="grid kpis">
+          <div class="card kpi"><div class="lbl">Ideas planted <span>🌱</span></div><div class="val"><span class="num" id="kIdeas">0</span><span class="tag green" id="kIdeasTag"></span></div><div class="viz" id="vIdeas"></div></div>
+          <div class="card kpi"><div class="lbl">Avg. idea score</div><div class="val"><span class="num"><span id="kAvg">0</span><small>/100</small></span><span class="tag" id="kAvgTag"></span></div><div class="viz" id="vAvg"></div></div>
+          <div class="card kpi"><div class="lbl">Harvested</div><div class="val"><span class="num"><span id="kHv">0</span><small>/ 6</small></span><span class="tag" id="kHvTag"></span></div><div class="viz" id="vHv"></div></div>
+          <div class="card kpi"><div class="lbl">Shop readiness</div><div id="vReady" style="margin-top:auto"></div></div>
+        </div>
+        <div class="grid row2">
+          <div class="card"><h3>Top ideas right now</h3><p class="sub">Ranked by your scores and duels. Tap to open.</p><div class="rank" id="rank"></div></div>
+          <div class="card"><h3>Idea mix</h3><p class="sub">Planted ideas by type</p><div class="donut"><div id="donut"></div><div class="legend" id="legend"></div></div></div>
+          <div class="card"><h3>Score by idea</h3><p class="sub">Gold = in your harvest</p><div class="bars" id="bars"></div></div>
+        </div>
+        <div class="grid row3">
+          <div class="card"><h3>Coach</h3><p class="sub">What your field is telling you</p><div class="coach" id="coach"></div></div>
+          <div class="card"><h3>Roadmap</h3><p class="sub">When each idea would start</p><div id="road" class="coach"></div></div>
+        </div>
+      </section>
+
+      <!-- FIELD -->
+      <section class="view" id="v-field">
+        <div class="fieldtitle" id="fTitle"></div>
+        <div class="fieldbar">
+          <div class="pill"><span><i style="background:var(--seed)"></i>Seed</span><span><i style="background:var(--sprout)"></i>Sprout</span><span><i style="background:var(--leaf)"></i>Growing</span><span><i style="background:var(--gold)"></i>Ripe</span><span>★ gold label = harvested</span></div>
+          <button class="btn gold" data-add>Plant an idea</button>
+        </div>
+      </section>
+
+      <!-- IDEAS -->
+      <section class="view" id="v-ideas">
+        <div class="hero"><div><h1>All <em>ideas</em></h1><p>Every idea is editable. Tap a card to sharpen it, score it or move it forward.</p></div></div>
+        <div class="toolbar">
+          <label class="pill search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search ideas, tags…" aria-label="Search ideas"></label>
+          <div class="chips" id="chips"></div>
+          <select class="sel" id="sort" aria-label="Sort"><option value="score">Best score</option><option value="new">Newest</option><option value="stage">Most ripe</option><option value="az">A to Z</option></select>
+        </div>
+        <div class="grid cards" id="cards"></div>
+      </section>
+
+      <!-- DUEL -->
+      <section class="view" id="v-duel">
+        <div class="hero"><div><h1>Idea <em>duel</em></h1><p>Two ideas, one shop. Trust your gut and tap the one you'd rather open. Every duel moves the ranking.</p></div><span class="tag" id="duelCount"></span></div>
+        <div class="grid row3" style="margin-top:0">
+          <div><p class="dq">If you could only do one…</p><div class="duel" id="duel"></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm ghost" id="skip">Skip this pair</button></div></div>
+          <div class="card"><h3>Duel ranking</h3><p class="sub">Your gut feeling, measured</p><div class="rank" id="duelRank"></div></div>
+        </div>
+      </section>
+
+      <!-- HARVEST -->
+      <section class="view" id="v-harvest">
+        <div class="hero"><div><h1>The <em>harvest</em></h1><p>Pick the 5 or 6 ideas that become your shop. One core concept, then the extras that make it special.</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn gold" id="autoPick">Auto-pick best 6</button><button class="btn" id="clearPick">Clear</button></div></div>
+        <div class="grid hv">
+          <div class="grid" style="gap:14px">
+            <div class="card"><h3>Your ideas</h3><p class="sub">Tap the circle to harvest. Max 6.</p><div class="plist" id="plist"></div></div>
+            <div class="card"><h3>What matters most to you</h3><p class="sub">Move a slider and every ranking updates live.</p><div class="weights" id="weights"></div></div>
+          </div>
+          <div class="card blue" id="blueprint"></div>
+        </div>
+      </section>
+
+      <!-- BACKUP -->
+      <section class="view" id="v-backup">
+        <div class="hero"><div><h1>Fields &amp; <em>backup</em></h1><p>One field per business idea. Your data lives in this browser; export it to move it to another device.</p></div></div>
+        <div class="grid bk">
+          <div class="card"><h3>This field</h3><p class="sub">The business you're planning</p>
+            <div class="fld"><label for="fName">Field name</label><input class="in" id="fName"></div>
+            <div class="fld" style="margin-top:10px"><label for="fPlace">Place</label><input class="in" id="fPlace"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn sm gold" id="newField">New field</button><button class="btn sm danger" id="delField">Delete this field</button></div>
+          </div>
+          <div class="card"><h3>Cloud sync</h3><p class="sub">Enter your private passcode to sync ideas between your phone and laptop.</p>
+            <p class="note" id="cloudState" style="margin:0 0 10px"></p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><input class="in" id="ckey" type="password" autocomplete="current-password" placeholder="Passcode" style="flex:1 1 160px"><button class="btn sm gold" id="connect">Connect</button><button class="btn sm ghost" id="disconnect">Disconnect</button></div>
+          </div>
+          <div class="card"><h3>Export</h3><p class="sub">Save a copy of every field and idea</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm gold" id="dl">Download .json</button><button class="btn sm" id="cp">Copy to clipboard</button></div>
+            <p class="note" style="margin-top:12px">Tip: export once a week and keep it in your Drive.</p>
+          </div>
+          <div class="card"><h3>Import</h3><p class="sub">Load a backup file or paste it</p>
+            <input type="file" id="file" accept=".json,application/json" class="in">
+            <textarea class="in" id="paste" placeholder="…or paste backup text here" style="margin-top:8px;min-height:70px"></textarea>
+            <button class="btn sm" id="imp" style="margin-top:8px">Import pasted text</button>
+          </div>
+          <div class="card"><h3>Start over</h3><p class="sub">Replaces everything in this browser</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="loadEx">Load Jounieh example</button><button class="btn sm danger" id="wipe">Start empty</button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Edit idea"></aside>
+<div class="modal" id="modal" role="dialog" aria-label="Plant an idea"></div>
+<div class="toast" id="toast"><span id="toastTxt"></span><button id="toastBtn">Undo</button></div>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KEY='orchard.v1';
+
+const CATS={core:['Core concept','#efc56b'],menu:['Menu','#8fd07a'],addon:['Add-on','#7cc7c0'],exp:['Experience','#d79be0'],mkt:['Marketing','#f0a27a'],ops:['Operations','#b9c3ad']};
+const STAGES=[['seed','Seed','var(--seed)'],['sprout','Sprout','var(--sprout)'],['growing','Growing','var(--leaf)'],['ripe','Ripe','var(--gold)']];
+const PHASES=[['open','Opening day'],['m6','After 6 months'],['y2','Year 2+']];
+const CR=[['passion','Passion','How much you love it'],['demand','Demand','Will people in this area pay for it?'],['margin','Margin','Profit on each sale'],['cost','Low cost','Cheap and fast to start'],['ease','Easy to run','Simple to staff and operate'],['fit','Brand fit','Fits the main concept and story']];
+const QS={
+ core:['Who eats here on a rainy Tuesday in February, not just summer weekends?','What is the one item people will drive to Jounieh for?','Where exactly: highway, old souk, or seaside? Why there?','Can you test it as a pop-up or delivery-only before signing a lease?'],
+ menu:['Can it be made with the same kitchen, stock and staff?','What will it cost per plate and sell for?','Does it make the main concept stronger or confusing?'],
+ addon:['Who runs it day to day when you are not there?','Does it share stock or suppliers with the shop?','What permits or space does it need?'],
+ exp:['Does it still work for families and lunch guests?','What are the noise, permit and staffing rules?','How will it pay for itself on a slow night?'],
+ mkt:['Which Reel or post would show this off?','How will you measure if it brings customers back?'],
+ ops:['What does a normal day look like with this running?','What does it cost per month to keep running?']
+};
+
+function example(){
+ const f={id:'jounieh',name:'Jounieh restaurant',place:'Jounieh, Lebanon',shop:'',created:Date.now()};
+ const d=(t,cat,note,tags,s,cost,profit,stage,phase,sug)=>({id:uid(),field:f.id,title:t,cat,note,tags,scores:{passion:s[0],demand:s[1],margin:s[2],cost:s[3],ease:s[4],fit:s[5]},cost,profit,stage,phase,sug:!!sug,elo:1500,duels:0,harvest:false,answers:{},created:Date.now()-Math.random()*8e8});
+ return {v:1,cur:f.id,fields:[f],weights:{passion:3,demand:5,margin:4,cost:3,ease:3,fit:4},duels:0,ideas:[
+  d('Smash burger shop','core','Crispy-edged smash burgers and a short menu done perfectly. Fast, loud, loved.',['burger','fast food'],[5,4,4,3,3,5],55000,5500,'growing','open'),
+  d('Healthy kitchen: lean burgers, baguettes and a salad bar','core','Healthy burgers, fresh baguette sandwiches and a build-your-own salad bar for the lunch crowd.',['healthy','burger','lunch'],[4,4,3,3,2,5],65000,5000,'growing','open'),
+  d('Açaí bowls and fresh juice bar','core','Açaí bowls, smoothies and fresh juices. Bright, Instagram-friendly, strong in summer.',['healthy','summer','drinks'],[4,3,5,4,4,4],30000,3500,'sprout','open'),
+  d('Healthy vending machines next to the shop','addon','Ready-to-go salads and healthy snacks, open 24/7 beside the shop.',['healthy','24/7'],[3,3,4,3,4,4],12000,900,'seed','y2'),
+  d('DJ night once a week','exp','One night a week the shop turns into a hangout with a DJ.',['night','music'],[5,4,3,4,3,3],4000,1200,'sprout','m6'),
+  d('One kitchen, two menus','menu','Merge the burger and healthy ideas: classic smash burgers plus lean and protein versions and a salad bar, on the same grill.',['burger','healthy'],[4,4,4,5,4,5],3000,1500,'seed','open',1),
+  d('Game menu with build-your-burger and spin-to-win','mkt','A Jay Motion interactive menu: guests build their burger on their phone and spin for rewards. Also a showcase for the studio.',['loyalty','instagram'],[5,3,4,4,4,5],2500,800,'seed','open',1),
+  d('Gym and office lunch plans','ops','Weekly lunch subscriptions for nearby gyms and offices. Steady income on weekdays.',['healthy','lunch','recurring'],[3,4,3,5,3,4],1000,1500,'seed','m6',1),
+  d('Delivery-only test kitchen for 2 to 3 months','ops','Rent or share a small kitchen, sell on delivery apps, and learn what Jounieh orders before signing a long lease.',['test'],[3,4,3,4,3,4],8000,1000,'seed','open',1),
+  d('Summer delivery to the marina and beaches','addon','Deliver bowls, burgers and juices to boats and beach clubs in summer.',['summer','delivery'],[3,3,3,4,3,3],2000,1200,'seed','m6',1)
+ ]};
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.fields&&s.ideas)return s}catch(e){}return null}
+let S=load()||example();
+let saveT;
+function save(){S.updatedAt=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},200);pushSoon()}
+
+/* ---------- CLOUD SYNC (Vercel Blob via /api/data) ---------- */
+let ckey='';try{ckey=localStorage.getItem('orchard.key')||''}catch(e){}
+let pushT,syncState=ckey?'saving':'local';
+function setSync(s){syncState=s;const el=document.querySelector('#sync');if(!el)return;const m={local:['Saved on this device','grey'],saving:['Syncing…','grey'],ok:['Synced to cloud','green'],off:['Offline · saved here','warn'],bad:['Wrong passcode','warn']}[s];el.textContent=m[0];el.className='tag '+m[1];const c=document.querySelector('#cloudState');if(c)c.textContent=ckey?m[0]:'Not connected. Ideas stay on this device only.'}
+async function api(method,body){const r=await fetch('/api/data',{method,headers:{'x-orchard-key':ckey,'content-type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});return r}
+function pushSoon(){if(!ckey)return;setSync('saving');clearTimeout(pushT);pushT=setTimeout(pushNow,1200)}
+async function pushNow(){if(!ckey)return;try{const r=await api('PUT',S);if(r.status===401){setSync('bad');return}setSync(r.ok?'ok':'off')}catch(e){setSync('off')}}
+async function pull(first){if(!ckey){setSync('local');return}try{const r=await api('GET');if(r.status===401){setSync('bad');if(first)toast('That passcode was not accepted.');return false}if(r.status===404){await pushNow();return true}if(!r.ok){setSync('off');return false}const d=await r.json();if(d&&d.fields&&d.ideas&&(first||(d.updatedAt||0)>(S.updatedAt||0))){S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}pair=null;drawField();renderAll()}else if((S.updatedAt||0)>(d.updatedAt||0)){await pushNow();return true}setSync('ok');return true}catch(e){setSync('off');return false}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ckey&&!openId)pull()});
+
+const field=()=>S.fields.find(f=>f.id===S.cur)||S.fields[0];
+const ideas=()=>S.ideas.filter(i=>i.field===field()?.id);
+const byId=id=>S.ideas.find(i=>i.id===id);
+function crit(i){let a=0,b=0;for(const[k]of CR){const w=+S.weights[k]||0;a+=w*(i.scores[k]||0);b+=w*5}return b?a/b*100:0}
+const duelPct=i=>Math.max(0,Math.min(100,50+(i.elo-1500)/4));
+const score=i=>Math.round(crit(i)*.8+duelPct(i)*.2);
+const answered=i=>Object.values(i.answers||{}).filter(v=>v&&v.trim()).length;
+const money=n=>{n=+n||0;return '$'+(n>=1000?(n/1000).toFixed(n%1000?1:0)+'k':n)};
+const stageOf=k=>STAGES.find(s=>s[0]===k)||STAGES[0];
+const ranked=()=>ideas().slice().sort((a,b)=>score(b)-score(a));
+
+function countUp(el,to,dur=900){if(!el)return;const from=+el.dataset.v||0;el.dataset.v=to;if(RM){el.textContent=to;return}const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/dur),e=1-(1-p)**3;el.textContent=Math.round(from+(to-from)*e);if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
+function ring(v,size=52,stroke=5,col='var(--gold)'){const r=(size-stroke)/2,c=2*Math.PI*r;return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-v/100)}" style="transition:stroke-dashoffset 1s var(--ease)"/></svg>`}
+function flip(box,fn){const pos={};box.querySelectorAll('[data-id]').forEach(e=>pos[e.dataset.id]=e.getBoundingClientRect().top);fn();if(RM)return;box.querySelectorAll('[data-id]').forEach(e=>{const p=pos[e.dataset.id];if(p==null)return;const d=p-e.getBoundingClientRect().top;if(!d)return;e.animate([{transform:`translateY(${d}px)`},{transform:'none'}],{duration:550,easing:'cubic-bezier(.2,.8,.2,1)'})})}
+
+/* ---------- FIELD CANVAS ---------- */
+let blocks=[];
+function rnd(seed){let s=seed%2147483647||7;return()=>(s=s*16807%2147483647)/2147483647}
+function drawField(){
+ const c=$('#field'),W=innerWidth,H=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+ c.width=W*dpr;c.height=H*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+ const r=rnd(1234+S.fields.indexOf(field())*97);
+ x.fillStyle='#8c8668';x.fillRect(0,0,W,H);
+ const n=Math.max(ideas().length,6);
+ let bw=Math.max(100,Math.min(260,Math.sqrt(W*H/(n*2.4))));
+ const safe=b=>b.cx>W*.1&&b.cx<W*.9&&b.cy>H*.24&&b.cy<H*.78&&!(W<720&&b.cy>H*.7);
+ let list;
+ for(let k=0;k<8;k++){list=[];const bh=bw*.8,cols=Math.ceil(W/bw)+1,rows=Math.ceil(H/bh)+1;for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){const ox=(j%2)*bw*.18;list.push({x:i*bw-ox-bw*.2,y:j*bh-bh*.2,w:bw,h:bh})}list.forEach(b=>{b.cx=b.x+b.w/2;b.cy=b.y+b.h/2});if(list.filter(safe).length>=n)break;bw*=.85}
+ const pal=['#2d4620','#36552a','#3f5f2a','#2a401e','#4a6a2e','#5b6f33','#466a33','#33502a'];
+ list.forEach(b=>{
+  const g=6+r()*4,X=b.x+g,Y=b.y+g,Wd=b.w-g*2,Hd=b.h-g*2;
+  x.save();x.beginPath();x.roundRect?x.roundRect(X,Y,Wd,Hd,6):x.rect(X,Y,Wd,Hd);x.clip();
+  x.fillStyle=pal[Math.floor(r()*pal.length)];x.fillRect(X,Y,Wd,Hd);
+  const ang=[0,Math.PI/4,-Math.PI/4,Math.PI/2,Math.PI/6][Math.floor(r()*5)];
+  x.translate(X+Wd/2,Y+Hd/2);x.rotate(ang);const D=Math.hypot(Wd,Hd);const gap=5+r()*3;
+  for(let t=-D;t<D;t+=gap){x.fillStyle='rgba(12,24,10,.45)';x.fillRect(-D,t,D*2,1.6);x.fillStyle='rgba(170,210,110,.16)';x.fillRect(-D,t+2,D*2,1.2)}
+  x.restore();
+ });
+ for(let i=0;i<Math.round(W*H/9000);i++){const tx=r()*W,ty=r()*H,cl=2+Math.floor(r()*5);for(let k=0;k<cl;k++){const px=tx+(r()-.5)*40,py=ty+(r()-.5)*30,rad=7+r()*13;x.fillStyle='rgba(5,12,4,.35)';x.beginPath();x.ellipse(px+rad*.5,py+rad*.55,rad,rad*.8,0,0,7);x.fill();const gr=x.createRadialGradient(px-rad*.4,py-rad*.4,1,px,py,rad);gr.addColorStop(0,'#9cc46a');gr.addColorStop(.6,'#4f7a32');gr.addColorStop(1,'#2a4a1c');x.fillStyle=gr;x.beginPath();x.arc(px,py,rad,0,7);x.fill()}}
+ const v=x.createRadialGradient(W*.5,H*.45,Math.min(W,H)*.2,W*.5,H*.5,Math.max(W,H)*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=v;x.fillRect(0,0,W,H);
+ const s=list.filter(safe);const r2=rnd(99);for(let i=s.length-1;i>0;i--){const j=Math.floor(r2()*(i+1));[s[i],s[j]]=[s[j],s[i]]}
+ blocks=s;
+}
+function renderPins(){
+ const list=ideas().slice().sort((a,b)=>a.created-b.created);
+ const W=innerWidth,H=innerHeight,mob=W<720;let pos=blocks,maxc=26,dotsOnly=false;
+ if(mob){const top=H*.27,bot=H-300,rows=Math.ceil(list.length/2),gap=rows>1?(bot-top)/(rows-1):0;dotsOnly=gap<46;maxc=W<380?11:13;pos=list.map((_,k)=>({cx:W*(k%2?.7:.3)+((Math.floor(k/2)%2)?14:-14),cy:top+Math.floor(k/2)*gap+30}))}
+ $('#pins').classList.toggle('compact',mob);
+ $('#pins').innerHTML=list.map((i,k)=>{const b=pos[k%Math.max(pos.length,1)]||{cx:200,cy:200};const st=stageOf(i.stage);const short=dotsOnly?'':(i.title.length>maxc?i.title.slice(0,maxc-1).trim()+'…':i.title);
+  return `<button class="pin ${i.harvest?'h':''}" data-open="${esc(i.id)}" style="left:${b.cx}px;top:${b.cy}px;--c:${st[2]};animation-delay:${k*60}ms"><span class="lab"><i></i>${esc(short)} <em>· ${score(i)}</em></span><span class="stem"></span><span class="dot"></span></button>`}).join('');
+ const f=field();$('#fTitle').innerHTML=`${esc(f?.name||'')}<small>${esc(f?.place||'')} · ${ideas().length} ideas planted</small>`;
+}
+
+/* ---------- OVERVIEW ---------- */
+function renderOverview(){
+ const L=ideas(),f=field(),R=ranked();
+ $('#ovTitle').innerHTML=`${esc(f?.name||'No field')}`;
+ $('#ovSub').textContent=`${f?.place||''}${f?.place?' · ':''}every idea you have for this business, in one place.`;
+ countUp($('#kIdeas'),L.length);
+ const week=L.filter(i=>Date.now()-i.created<6048e5).length;$('#kIdeasTag').textContent=week?`+${week} this week`:'Keep planting';
+ const sc=L.map(score);const avg=L.length?Math.round(sc.reduce((a,b)=>a+b,0)/L.length):0;countUp($('#kAvg'),avg);
+ $('#kAvgTag').textContent=avg>=70?'Strong':avg>=55?'Promising':'Early';
+ const srt=sc.slice().sort((a,b)=>a-b);
+ const pts=srt.length>1?srt.map((v,k)=>[k/(srt.length-1)*100,40-v/100*38]):[[0,30],[100,30]];
+ const line=pts.map((p,k)=>(k?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+ $('#vAvg').innerHTML=`<svg viewBox="0 0 100 40" preserveAspectRatio="none"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efc56b" stop-opacity=".55"/><stop offset="1" stop-color="#efc56b" stop-opacity="0"/></linearGradient></defs><path d="${line} L100 40 L0 40Z" fill="url(#ga)"/><path class="draw" d="${line}" fill="none" stroke="#efc56b" stroke-width="2" vector-effect="non-scaling-stroke" pathLength="600"/></svg>`;
+ const counts=STAGES.map(s=>L.filter(i=>i.stage===s[0]).length),mx=Math.max(1,...counts);
+ $('#vIdeas').innerHTML=`<div class="lolli">${STAGES.map((s,k)=>`<div><i style="--c:${s[2]};height:0" data-h="${8+counts[k]/mx*48}"></i>${s[1]} ${counts[k]}</div>`).join('')}</div>`;
+ requestAnimationFrame(()=>$$('#vIdeas i').forEach(e=>e.style.height=e.dataset.h+'px'));
+ const H=L.filter(i=>i.harvest);countUp($('#kHv'),H.length);
+ const hc=H.filter(i=>i.cat==='core').length;$('#kHvTag').textContent=!H.length?'Not started':hc===1?'1 core ✓':hc>1?`${hc} cores!`:'No core yet';
+ $('#kHvTag').className='tag '+(hc>1||(H.length&&!hc)?'warn':'');
+ $('#vHv').innerHTML=`<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;height:100%;align-items:end">${Array.from({length:6},(_,k)=>`<div style="height:${H[k]?70:30}%;border-radius:10px;background:${H[k]?'var(--gold)':'rgba(255,255,255,.08)'};transition:height .8s var(--ease) ${k*80}ms" title="${esc(H[k]?.title||'empty')}"></div>`).join('')}</div>`;
+ renderGauge($('#vReady'),readiness(L));
+ flip($('#rank'),()=>{$('#rank').innerHTML=R.slice(0,6).map((i,k)=>`<button class="it" data-id="${esc(i.id)}" data-open="${esc(i.id)}"><span class="n">${k+1}</span><span class="t">${i.harvest?'★ ':''}${esc(i.title)}</span><span class="bar"><i data-w="${score(i)}"></i></span><span class="s">${score(i)}</span></button>`).join('')||'<p class="empty">Plant your first idea.</p>'});
+ requestAnimationFrame(()=>$$('#rank .bar i').forEach(e=>e.style.width=e.dataset.w+'%'));
+ const cats=Object.keys(CATS).map(k=>[k,L.filter(i=>i.cat===k).length]).filter(c=>c[1]);
+ const tot=L.length||1;let acc=0;const R0=50,C=2*Math.PI*R0;
+ $('#donut').innerHTML=`<svg viewBox="0 0 130 130" style="width:100%;transform:rotate(-90deg)"><circle cx="65" cy="65" r="${R0}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="14"/>${cats.map(([k,n])=>{const len=n/tot*C;const s=`<circle cx="65" cy="65" r="${R0}" fill="none" stroke="${CATS[k][1]}" stroke-width="14" stroke-dasharray="${Math.max(len-3,1)} ${C}" stroke-dashoffset="${-acc}"/>`;acc+=len;return s}).join('')}<text x="65" y="72" text-anchor="middle" transform="rotate(90 65 65)" fill="#eef2e8" style="font:700 24px Manrope,sans-serif">${L.length}</text></svg>`;
+ $('#legend').innerHTML=cats.map(([k,n])=>`<div><i style="background:${CATS[k][1]}"></i>${CATS[k][0]}<b>${Math.round(n/tot*100)}%</b></div>`).join('')||'<span class="note">No ideas yet</span>';
+ $('#bars').innerHTML=R.slice(0,12).map(i=>`<button class="b ${i.harvest?'h':''}" data-open="${esc(i.id)}" title="${esc(i.title)}: ${score(i)}"><i data-h="${score(i)}"></i><span>${score(i)}</span></button>`).join('');
+ requestAnimationFrame(()=>$$('#bars i').forEach(e=>e.style.height=(e.dataset.h*1.3)+'px'));
+ $('#coach').innerHTML=insights(L).map(t=>`<div class="tip ${t[0]}"><span class="ic">${t[0]==='warn'?'!':'✦'}</span><div>${t[1]}${t[2]?`<br><button class="btn sm" data-go="${t[2]}">${t[3]}</button>`:''}</div></div>`).join('')||'<div class="tip"><span class="ic">✦</span><div>Your field looks healthy. Keep planting.</div></div>';
+ $('#road').innerHTML=PHASES.map(([k,lab])=>{const P=L.filter(i=>i.phase===k);const c=P.reduce((a,i)=>a+(+i.cost||0),0);return `<div class="tip"><span class="ic">${PHASES.findIndex(p=>p[0]===k)+1}</span><div><b>${lab}</b> · ${P.length} ideas · ${money(c)} to start<br><span class="note">${P.slice(0,4).map(i=>esc(i.title)).join(' · ')||'Nothing planned yet'}</span></div></div>`}).join('');
+}
+function readiness(L){const H=L.filter(i=>i.harvest);const hc=H.filter(i=>i.cat==='core').length;const avg=H.length?H.reduce((a,i)=>a+score(i),0)/H.length:0;const sh=H.length?H.reduce((a,i)=>a+Math.min(1,answered(i)/2),0)/H.length:0;
+ return {v:Math.round(Math.min(H.length,6)/6*40+(hc===1?20:0)+avg*.3+sh*10),parts:[['Ideas picked',Math.min(H.length,6)+'/6'],['One core',hc===1?'yes':'no'],['Sharpened',Math.round(sh*100)+'%']]}}
+function renderGauge(el,{v,parts}){
+ const ticks=Array.from({length:31},(_,k)=>{const a=Math.PI*(1-k/30);const r1=78,r2=k%5?84:88;return `<line x1="${100+r1*Math.cos(a)}" y1="${100-r1*Math.sin(a)}" x2="${100+r2*Math.cos(a)}" y2="${100-r2*Math.sin(a)}" stroke="rgba(255,255,255,${k/30<=v/100?.6:.18})" stroke-width="1.4"/>`}).join('');
+ const L=Math.PI*64;
+ el.innerHTML=`<div class="gauge"><svg viewBox="0 0 200 118"><path d="M36 100 A64 64 0 0 1 164 100" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="13" stroke-linecap="round"/><path d="M36 100 A64 64 0 0 1 164 100" fill="none" stroke="#efc56b" stroke-width="13" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L}" id="gArc"/>${ticks}<text x="100" y="94" text-anchor="middle" fill="#eef2e8" style="font:600 34px Manrope,sans-serif">${v}%</text><text x="100" y="113" text-anchor="middle" fill="#a3b39f" style="font:700 9px Manrope,sans-serif;letter-spacing:1px">${v>=80?'READY TO OPEN':v>=50?'TAKING SHAPE':'GROWING'}</text></svg><div class="note" style="text-align:center">${parts.map(p=>`${p[0]}: <b style="color:var(--ink)">${p[1]}</b>`).join(' · ')}</div></div>`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{const a=el.querySelector('#gArc');if(a){a.style.transition='stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)';a.style.strokeDashoffset=L*(1-v/100)}}));
+}
+function insights(L){
+ const out=[],cores=L.filter(i=>i.cat==='core'),H=L.filter(i=>i.harvest),hcore=H.filter(i=>i.cat==='core');
+ if(cores.length>1)out.push(['warn',`<b>${cores.length} core concepts compete</b>: ${cores.map(i=>esc(i.title)).join(', ')}. A shop needs one heart. Duel them, or merge two into one menu.`,'duel','Start a duel']);
+ if(H.length&&!hcore.length)out.push(['warn','Your harvest has no core concept yet. Pick the main idea first, then the extras.','harvest','Open harvest']);
+ if(hcore.length>1)out.push(['warn',`Your harvest has ${hcore.length} core concepts. Keep one, or turn the others into a menu section.`,'harvest','Fix harvest']);
+ for(let a=0;a<cores.length;a++)for(let b=a+1;b<cores.length;b++){const t=(cores[a].tags||[]).find(x=>(cores[b].tags||[]).includes(x));if(t){out.push(['',`<b>${esc(cores[a].title)}</b> and <b>${esc(cores[b].title)}</b> both say “${esc(t)}”. They could become one shop.`]);a=b=99}}
+ const love=L.find(i=>i.scores.passion>=4&&i.scores.demand<=2);if(love)out.push(['',`You love <b>${esc(love.title)}</b> but doubt the demand. Test it as a one-week pop-up before spending.`]);
+ const costs=L.map(i=>+i.cost||0).sort((a,b)=>a-b),med=costs[Math.floor(costs.length/2)]||0;const big=L.filter(i=>i.cat!=='core'&&i.phase==='open'&&(+i.cost||0)>Math.max(med*2,10000))[0];if(big)out.push(['',`<b>${esc(big.title)}</b> is expensive for opening day. Moving it to Year 2+ protects your cash.`]);
+ const vague=L.filter(i=>answered(i)<2).length;if(vague)out.push(['',`${vague} idea${vague>1?'s are':' is'} still vague. Answer the Sharpen questions inside each idea to make them ripe.`,'ideas','See ideas']);
+ if(S.duels<L.length)out.push(['','Play a few duels. Your gut choices adjust the ranking more honestly than sliders.','duel','Play duels']);
+ return out.slice(0,4);
+}
+
+/* ---------- IDEAS ---------- */
+let catF='all',q='',sortBy='score';
+function renderIdeas(){
+ $('#chips').innerHTML=[['all','All']].concat(Object.entries(CATS).map(([k,v])=>[k,v[0]])).map(([k,l])=>`<button class="chip ${catF===k?'on':''}" data-cat="${k}">${l}</button>`).join('');
+ let L=ideas().filter(i=>catF==='all'||i.cat===catF);
+ if(q){const s=q.toLowerCase();L=L.filter(i=>(i.title+' '+i.note+' '+(i.tags||[]).join(' ')).toLowerCase().includes(s))}
+ const so={score:(a,b)=>score(b)-score(a),new:(a,b)=>b.created-a.created,az:(a,b)=>a.title.localeCompare(b.title),stage:(a,b)=>STAGES.findIndex(s=>s[0]===b.stage)-STAGES.findIndex(s=>s[0]===a.stage)||score(b)-score(a)}[sortBy];
+ L.sort(so);
+ flip($('#cards'),()=>{$('#cards').innerHTML=L.map((i,k)=>{const st=stageOf(i.stage),sc=score(i);return `<article class="card icard" data-id="${esc(i.id)}" data-open="${esc(i.id)}" style="animation-delay:${Math.min(k,12)*40}ms">
+ <div class="hd"><div class="ring">${ring(sc)}<b>${sc}</b></div><h4>${esc(i.title)}</h4><button class="star ${i.harvest?'on':''}" data-harvest="${esc(i.id)}" aria-label="Harvest">★</button></div>
+ <p>${esc(i.note)||'<span class="note">No description yet. Tap to add one.</span>'}</p>
+ <div class="meta"><span class="tag" style="background:color-mix(in srgb,${CATS[i.cat]?.[1]||'#999'} 18%,transparent);color:${CATS[i.cat]?.[1]||'#999'}">${CATS[i.cat]?.[0]||'Idea'}</span><span class="tag grey"><span style="width:7px;height:7px;border-radius:50%;background:${st[2]}"></span>${st[1]}</span>${i.sug?'<span class="tag grey">Suggested</span>':''}${(i.tags||[]).slice(0,3).map(t=>`<span class="tag grey">#${esc(t)}</span>`).join('')}</div>
+ <div class="crit">${CR.map(([k,l])=>`<div><i style="--h:${(i.scores[k]||0)*20}%"></i>${l.split(' ').pop()}</div>`).join('')}</div>
+ <div class="money"><span>Start <b>${money(i.cost)}</b></span><span>Profit/mo <b>${money(i.profit)}</b></span><span><b>${PHASES.find(p=>p[0]===i.phase)?.[1]||''}</b></span></div></article>`}).join('')||'<div class="card empty">No ideas match. Plant one with the gold button.</div>'});
+}
+
+/* ---------- DUEL ---------- */
+let pair=null,lastPairs=[];
+function pickPair(){const L=ideas();if(L.length<2)return null;const s=L.slice().sort((a,b)=>a.duels-b.duels||Math.random()-.5);const a=s[0];const cands=L.filter(i=>i!==a).sort((x,y)=>Math.abs(score(x)-score(a))-Math.abs(score(y)-score(a))+(Math.random()-.5)*20);const key=i=>[a.id,i.id].sort().join();const b=cands.find(i=>!lastPairs.includes(key(i)))||cands[0];lastPairs.push(key(b));lastPairs=lastPairs.slice(-6);return[a.id,b.id]}
+function renderDuel(){
+ if(!pair||!byId(pair[0])||!byId(pair[1])||byId(pair[0]).field!==S.cur)pair=pickPair();
+ $('#duelCount').textContent=`${S.duels} duels played`;
+ if(!pair){$('#duel').innerHTML='<div class="card empty" style="grid-column:1/-1">Plant at least two ideas to start a duel.</div>';$('#duelRank').innerHTML='';return}
+ const d=id=>{const i=byId(id);return `<button class="card dcard" data-win="${esc(id)}"><span class="tag">${CATS[i.cat]?.[0]||''}</span><h4>${esc(i.title)}</h4><p>${esc(i.note)}</p><div class="money" style="margin-top:auto"><span>Start <b>${money(i.cost)}</b></span><span>Profit/mo <b>${money(i.profit)}</b></span></div></button>`};
+ $('#duel').innerHTML=d(pair[0])+'<div class="vs"><b>VS</b></div>'+d(pair[1]);
+ const R=ideas().slice().sort((a,b)=>b.elo-a.elo);
+ flip($('#duelRank'),()=>{$('#duelRank').innerHTML=R.map((i,k)=>`<button class="it" data-id="${esc(i.id)}" data-open="${esc(i.id)}"><span class="n">${k+1}</span><span class="t">${esc(i.title)}</span><span class="bar"><i style="width:${duelPct(i)}%"></i></span><span class="s">${i.duels}</span></button>`).join('')});
+}
+function duelWin(id){const[a,b]=pair;const w=byId(id),l=byId(id===a?b:a);const ea=1/(1+10**((l.elo-w.elo)/400));w.elo+=24*(1-ea);l.elo-=24*(1-ea);w.duels++;l.duels++;S.duels++;save();
+ $$('.dcard').forEach(c=>c.classList.add(c.dataset.win===id?'win':'lose'));
+ setTimeout(()=>{pair=pickPair();renderAll()},RM?0:650)}
+
+/* ---------- HARVEST ---------- */
+function renderHarvest(){
+ const R=ranked(),H=R.filter(i=>i.harvest);
+ flip($('#plist'),()=>{$('#plist').innerHTML=R.map(i=>`<div class="prow ${i.harvest?'on':''}" data-id="${esc(i.id)}"><button class="star ${i.harvest?'on':''}" data-harvest="${esc(i.id)}" aria-label="Harvest ${esc(i.title)}">★</button><button style="all:unset;cursor:pointer" data-open="${esc(i.id)}"><span class="t">${esc(i.title)}</span><small>${CATS[i.cat]?.[0]||''} · ${money(i.cost)} to start</small></button><span class="s">${score(i)}</span></div>`).join('')||'<p class="empty">No ideas yet.</p>'});
+ $('#weights').innerHTML=CR.map(([k,l,h])=>`<label class="wrow" title="${esc(h)}"><span>${l}</span><input type="range" min="0" max="5" step="1" value="${S.weights[k]}" data-w="${k}" style="--p:${S.weights[k]*20}%" aria-label="${l} weight"><b>${S.weights[k]}</b></label>`).join('');
+ const f=field(),cost=H.reduce((a,i)=>a+(+i.cost||0),0),prof=H.reduce((a,i)=>a+(+i.profit||0),0),pay=prof?Math.ceil(cost/prof):0,hc=H.filter(i=>i.cat==='core');
+ const warns=[];if(!H.length)warns.push('Nothing harvested yet. Tap the stars, or let Auto-pick start you off.');if(H.length&&!hc.length)warns.push('No core concept yet: what is the shop, at heart?');if(hc.length>1)warns.push(`${hc.length} core concepts. Pick one heart; turn the rest into menu sections or later phases.`);if(H.length>6)warns.push('More than 6 ideas. Focus wins: cut back to 6.');if(H.length&&H.filter(i=>i.phase==='open').length>4)warns.push('More than 4 things on opening day. Spread them over phases.');
+ $('#blueprint').innerHTML=`<span class="tag">Shop blueprint</span><div style="margin-top:12px"><input class="shopname" id="shopName" value="${esc(f?.shop||'')}" placeholder="Name your shop…" aria-label="Shop name"></div><p class="note" style="margin-top:6px">${esc(f?.place||'')}</p>
+ <div class="totals"><div><small>Ideas</small><b>${H.length}/6</b></div><div><small>Startup budget</small><b>${money(cost)}</b></div><div><small>Profit / month</small><b>${money(prof)}</b></div><div><small>Pays back in</small><b>${pay?pay+' mo':'–'}</b></div></div>
+ <div id="hvGauge" style="max-width:260px;margin:0 auto"></div>
+ ${PHASES.map(([k,l])=>{const P=H.filter(i=>i.phase===k);return P.length?`<div class="phase"><h5>${l}</h5><ol>${P.map(i=>`<li>${i.cat==='core'?'<b>':''}${esc(i.title)}${i.cat==='core'?'</b> <span class="tag" style="padding:1px 8px">core</span>':''}</li>`).join('')}</ol></div>`:''}).join('')}
+ <div class="coach" style="margin-top:14px">${warns.map(w=>`<div class="tip warn"><span class="ic">!</span><div>${w}</div></div>`).join('')}</div>
+ <p class="note" style="margin-top:12px">Numbers add up your own draft estimates per idea. Treat them as a sketch, not a business plan.</p>`;
+ renderGauge($('#hvGauge'),readiness(ideas()));
+}
+function autoPick(){const R=ranked();R.forEach(i=>i.harvest=false);const core=R.find(i=>i.cat==='core');const pick=core?[core]:[];for(const i of R){if(pick.length>=6)break;if(i.cat==='core'||pick.includes(i))continue;if(i.scores.fit>=3)pick.push(i)}pick.forEach(i=>i.harvest=true);save();renderAll();toast('Picked your best 6. Swap any you disagree with.')}
+
+/* ---------- EDITOR ---------- */
+let openId=null;
+function openEditor(id){openId=id;const i=byId(id);if(!i)return;const D=$('#drawer');
+ D.innerHTML=`<div class="dhead"><span class="tag">${i.sug?'Suggested idea':'Your idea'}</span><div style="flex:1"></div><button class="btn sm ghost" id="dup">Duplicate</button><button class="btn sm danger" id="del">Delete</button><button class="btn sm" id="close" aria-label="Close">Done</button></div>
+ <div class="dbody">
+  <input class="in ttl" id="e-title" value="${esc(i.title)}" aria-label="Idea title">
+  <div class="live"><div class="ring">${ring(score(i),64,6)}<b class="big" id="e-score">${score(i)}</b></div><div><b>Idea score</b><br><span class="note" id="e-hint">${hint(i)}</span></div></div>
+  <div class="fld"><label for="e-note">The idea</label><textarea class="in" id="e-note">${esc(i.note)}</textarea></div>
+  <div class="fld"><span>Type</span><div class="seg" data-seg="cat">${Object.entries(CATS).map(([k,v])=>`<button class="${i.cat===k?'on':''}" data-v="${k}">${v[0]}</button>`).join('')}</div></div>
+  <div class="fld"><span>Stage</span><div class="seg" data-seg="stage">${STAGES.map(s=>`<button class="${i.stage===s[0]?'on':''}" data-v="${s[0]}">${s[1]}</button>`).join('')}</div></div>
+  <div class="fld"><span>When</span><div class="seg" data-seg="phase">${PHASES.map(s=>`<button class="${i.phase===s[0]?'on':''}" data-v="${s[0]}">${s[1]}</button>`).join('')}</div></div>
+  <div class="fld"><span>Score it (1 to 5)</span><div class="pips">${CR.map(([k,l,h])=>`<div class="pip"><b>${l}</b><div class="dots" data-crit="${k}">${[1,2,3,4,5].map(n=>`<button class="${(i.scores[k]||0)>=n?'on':''}" data-n="${n}" aria-label="${l} ${n}">${n}</button>`).join('')}</div><small>${h}</small></div>`).join('')}</div></div>
+  <div class="two"><div class="fld"><label for="e-cost">Startup cost ($)</label><input class="in" id="e-cost" type="number" inputmode="numeric" min="0" step="500" value="${+i.cost||0}"></div><div class="fld"><label for="e-profit">Profit per month ($)</label><input class="in" id="e-profit" type="number" inputmode="numeric" min="0" step="100" value="${+i.profit||0}"></div></div>
+  <div class="fld"><label for="e-tags">Tags (comma separated)</label><input class="in" id="e-tags" value="${esc((i.tags||[]).join(', '))}"></div>
+  <div class="fld"><span>Sharpen it</span><div class="qa">${(QS[i.cat]||[]).map((qq,k)=>`<div><div class="q">${esc(qq)}</div><textarea class="in" data-q="${esc(i.cat+k)}" style="min-height:56px" placeholder="Your answer…">${esc(i.answers?.[i.cat+k]||'')}</textarea></div>`).join('')}</div></div>
+  <button class="btn ${i.harvest?'':'gold'}" id="e-hv">${i.harvest?'★ In your harvest · remove':'Add to harvest'}</button>
+  <p class="note">Saved automatically on this device.</p>
+ </div>`;
+ D.classList.add('on');$('#scrim').classList.add('on');
+}
+function hint(i){const low=CR.filter(([k])=>(i.scores[k]||0)<=2).map(c=>c[1].toLowerCase());const a=answered(i);if(low.length)return `Weak on ${low.join(', ')}. Can you fix that, or is it a deal-breaker?`;if(a<2)return 'Answer two Sharpen questions below to make it ripe.';return score(i)>=75?'Strong idea. A harvest candidate.':'Solid. Duel it against your favourites.'}
+function liveUpdate(){const i=byId(openId);if(!i)return;$('#e-score').textContent=score(i);const r=$('.live .ring');r.querySelector('svg').outerHTML=ring(score(i),64,6);$('#e-hint').textContent=hint(i);save();renderAll(true)}
+function closeEditor(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on');$('#modal').classList.remove('on');openId=null}
+
+/* ---------- QUICK ADD ---------- */
+let rec=null;
+function openAdd(){const M=$('#modal');const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ M.innerHTML=`<h2>Plant an idea</h2><p class="note" style="margin:-6px 0 0">Into: <b style="color:var(--ink)">${esc(field()?.name||'')}</b>. Catch it fast; sharpen it later.</p>
+ <div style="display:flex;gap:8px;align-items:center"><input class="in" id="a-title" placeholder="e.g. Shawarma tacos on Fridays" aria-label="Idea title">${SR?'<button class="mic" id="mic" aria-label="Dictate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button>':''}</div>
+ <textarea class="in" id="a-note" placeholder="A line or two about it (optional)"></textarea>
+ <div class="seg" id="a-cat">${Object.entries(CATS).map(([k,v],n)=>`<button class="${n===1?'on':''}" data-v="${k}">${v[0]}</button>`).join('')}</div>
+ <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="a-cancel">Cancel</button><button class="btn gold" id="a-save">Plant it</button></div>`;
+ M.classList.add('on');$('#scrim').classList.add('on');setTimeout(()=>$('#a-title').focus(),200);
+ $('#mic')?.addEventListener('click',()=>{if(rec){rec.stop();return}rec=new SR();rec.lang='en-US';rec.interimResults=true;$('#mic').classList.add('rec');rec.onresult=e=>{const t=[...e.results].map(r=>r[0].transcript).join(' ');const ti=$('#a-title');if(!ti.value||ti.dataset.dict){ti.value=t.split(/[.,]/)[0].slice(0,70);ti.dataset.dict=1}$('#a-note').value=t};rec.onend=()=>{$('#mic')?.classList.remove('rec');rec=null};try{rec.start()}catch(e){rec=null}});
+}
+function plant(){const t=$('#a-title').value.trim();if(!t){$('#a-title').focus();return}const cat=$('#a-cat .on')?.dataset.v||'menu';
+ const i={id:uid(),field:S.cur,title:t,cat,note:$('#a-note').value.trim(),tags:[],scores:{passion:3,demand:3,margin:3,cost:3,ease:3,fit:3},cost:0,profit:0,stage:'seed',phase:'m6',sug:false,elo:1500,duels:0,harvest:false,answers:{},created:Date.now()};
+ S.ideas.push(i);save();
+ const r=$('#a-save').getBoundingClientRect();if(!RM){const s=document.createElement('div');s.className='seedfx';s.style.left=r.left+r.width/2+'px';s.style.top=r.top+'px';document.body.appendChild(s);s.animate([{transform:'translate(0,0) rotate(-45deg) scale(1)'},{transform:`translate(${innerWidth/2-r.left-r.width/2}px,${innerHeight*.6-r.top}px) rotate(-45deg) scale(.4)`,opacity:.2}],{duration:800,easing:'cubic-bezier(.5,0,.6,1)'}).onfinish=()=>s.remove()}
+ closeEditor();drawField();renderAll();toast(`Planted “${t}”. Tap it to sharpen it.`,'Open',()=>openEditor(i.id));
+}
+
+/* ---------- TOAST ---------- */
+let toastT,toastFn;
+function toast(msg,btn,fn){$('#toastTxt').textContent=msg;$('#toastBtn').textContent=btn||'OK';$('#toastBtn').style.display='';toastFn=fn||null;$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),5000)}
+
+/* ---------- BACKUP ---------- */
+function renderBackup(){const f=field();$('#fName').value=f?.name||'';$('#fPlace').value=f?.place||'';
+ $('#fieldSel').innerHTML=S.fields.map(x=>`<option value="${esc(x.id)}" ${x.id===S.cur?'selected':''}>${esc(x.name)}</option>`).join('')}
+function importData(txt){try{const d=JSON.parse(txt);if(!d.fields||!d.ideas)throw 0;S=d;S.cur=S.cur||S.fields[0]?.id;save();drawField();renderAll();toast('Backup imported.')}catch(e){toast('That backup could not be read.')}}
+
+/* ---------- ROUTER ---------- */
+const VIEWS=['overview','field','ideas','duel','harvest','backup'];
+function go(v){if(!VIEWS.includes(v))v='overview';document.body.className='v-'+v;$$('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));$$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.go===v));if(location.hash!=='#'+v)history.replaceState(null,'','#'+v);
+ if(v==='field')renderPins();if(v==='overview')renderOverview()}
+function renderAll(quiet){renderBackup();renderOverview();renderIdeas();renderDuel();renderHarvest();if(!quiet||document.body.classList.contains('v-field'))renderPins()}
+
+/* ---------- EVENTS ---------- */
+document.addEventListener('click',e=>{
+ const t=e.target;
+ const hv=t.closest('[data-harvest]');if(hv){e.stopPropagation();const i=byId(hv.dataset.harvest);if(!i.harvest&&ideas().filter(x=>x.harvest).length>=6){toast('Harvest is full (6). Remove one first.');return}i.harvest=!i.harvest;save();renderAll();return}
+ const g=t.closest('[data-go]');if(g){go(g.dataset.go);return}
+ if(t.closest('[data-add]')||t.closest('#addBtn')){openAdd();return}
+ const w=t.closest('[data-win]');if(w){duelWin(w.dataset.win);return}
+ const ch=t.closest('[data-cat]');if(ch){catF=ch.dataset.cat;renderIdeas();return}
+ const o=t.closest('[data-open]');if(o&&!t.closest('#drawer')){openEditor(o.dataset.open);return}
+ if(t.closest('#scrim')||t.closest('#close')||t.closest('#a-cancel')){closeEditor();return}
+ if(t.closest('#a-save')){plant();return}
+ const segB=t.closest('#a-cat button');if(segB){$$('#a-cat button').forEach(b=>b.classList.toggle('on',b===segB));return}
+ if(openId){const i=byId(openId);
+  const sb=t.closest('[data-seg] button');if(sb){const k=sb.parentNode.dataset.seg;i[k]=sb.dataset.v;sb.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===sb));if(k==='cat'){openEditor(openId)}liveUpdate();return}
+  const pb=t.closest('[data-crit] button');if(pb){const k=pb.parentNode.dataset.crit,n=+pb.dataset.n;i.scores[k]=n;pb.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.n<=n));liveUpdate();return}
+  if(t.closest('#e-hv')){if(!i.harvest&&ideas().filter(x=>x.harvest).length>=6){toast('Harvest is full (6). Remove one first.');return}i.harvest=!i.harvest;save();renderAll();openEditor(openId);return}
+  if(t.closest('#del')){const k=S.ideas.indexOf(i);S.ideas.splice(k,1);save();closeEditor();drawField();renderAll();toast(`Deleted “${i.title}”.`,'Undo',()=>{S.ideas.splice(k,0,i);save();drawField();renderAll()});return}
+  if(t.closest('#dup')){const c=JSON.parse(JSON.stringify(i));c.id=uid();c.title+=' (copy)';c.created=Date.now();c.harvest=false;S.ideas.push(c);save();drawField();renderAll();openEditor(c.id);return}
+ }
+ if(t.closest('#toastBtn')){$('#toast').classList.remove('on');toastFn&&toastFn();return}
+ if(t.closest('#skip')){pair=pickPair();renderDuel();return}
+ if(t.closest('#autoPick')){autoPick();return}
+ if(t.closest('#clearPick')){ideas().forEach(i=>i.harvest=false);save();renderAll();return}
+ if(t.closest('#newField')){const f={id:uid(),name:'New business idea',place:'',shop:'',created:Date.now()};S.fields.push(f);S.cur=f.id;save();drawField();renderAll();$('#fName').focus();$('#fName').select();toast('New field created. Name it, then plant ideas.');return}
+ if(t.closest('#delField')){if(S.fields.length<2){toast('You need at least one field.');return}const f=field(),snap=JSON.stringify(S);S.ideas=S.ideas.filter(i=>i.field!==f.id);S.fields=S.fields.filter(x=>x!==f);S.cur=S.fields[0].id;save();drawField();renderAll();toast(`Deleted field “${f.name}”.`,'Undo',()=>{S=JSON.parse(snap);save();drawField();renderAll()});return}
+ if(t.closest('#dl')){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`orchard-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();toast('Backup downloaded (if your browser allows it). Copy works everywhere.');return}
+ if(t.closest('#cp')){navigator.clipboard?.writeText(JSON.stringify(S)).then(()=>toast('Backup copied. Paste it into a note or email to yourself.'),()=>toast('Copy was blocked here. Try Download.'));return}
+ if(t.closest('#connect')){const v=$('#ckey').value.trim();if(!v){$('#ckey').focus();return}ckey=v;try{localStorage.setItem('orchard.key',v)}catch(e){}setSync('saving');pull(true).then(ok=>{if(ok){toast('Connected. Your ideas now sync everywhere.');$('#ckey').value=''}else if(syncState==='bad'){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}setSync('bad')}else toast('Could not reach the cloud. Try again online.')});return}
+ if(t.closest('#disconnect')){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}setSync('local');toast('Disconnected. This device keeps its own copy.');return}
+ if(t.closest('#imp')){importData($('#paste').value);return}
+ if(t.closest('#loadEx')){const snap=JSON.stringify(S);S=example();save();drawField();renderAll();toast('Jounieh example loaded.','Undo',()=>{S=JSON.parse(snap);save();drawField();renderAll()});return}
+ if(t.closest('#wipe')){const snap=JSON.stringify(S);const f={id:uid(),name:'My next business',place:'',shop:'',created:Date.now()};S={v:1,cur:f.id,fields:[f],ideas:[],weights:S.weights,duels:0};save();drawField();renderAll();toast('Fresh start.','Undo',()=>{S=JSON.parse(snap);save();drawField();renderAll()});return}
+});
+document.addEventListener('input',e=>{const t=e.target;
+ if(openId){const i=byId(openId);
+  if(t.id==='e-title'){i.title=t.value;liveUpdate()}
+  else if(t.id==='e-note'){i.note=t.value;liveUpdate()}
+  else if(t.id==='e-cost'){i.cost=Math.max(0,+t.value||0);liveUpdate()}
+  else if(t.id==='e-profit'){i.profit=Math.max(0,+t.value||0);liveUpdate()}
+  else if(t.id==='e-tags'){i.tags=t.value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);liveUpdate()}
+  else if(t.dataset.q){i.answers=i.answers||{};i.answers[t.dataset.q]=t.value;liveUpdate()}
+ }
+ if(t.dataset.w){S.weights[t.dataset.w]=+t.value;t.style.setProperty('--p',t.value*20+'%');t.nextElementSibling.textContent=t.value;save();renderOverview();renderIdeas();renderDuel();flip($('#plist'),()=>{});
+   const R=ranked();const box=$('#plist');flip(box,()=>{R.forEach(i=>{const row=box.querySelector(`[data-id="${CSS.escape(i.id)}"]`);if(row){row.querySelector('.s').textContent=score(i);box.appendChild(row)}})})}
+ if(t.id==='q'){q=t.value;renderIdeas()}
+ if(t.id==='shopName'){field().shop=t.value;save()}
+ if(t.id==='fName'){field().name=t.value||'Untitled';save();renderBackup();renderOverview()}
+ if(t.id==='fPlace'){field().place=t.value;save();renderOverview()}
+});
+$('#sort').addEventListener('change',e=>{sortBy=e.target.value;renderIdeas()});
+$('#fieldSel').addEventListener('change',e=>{S.cur=e.target.value;pair=null;save();drawField();renderAll()});
+$('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;f.text().then(importData)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEditor();if(e.key==='Enter'&&$('#modal').classList.contains('on')&&e.target.id==='a-title'){e.preventDefault();plant()}});
+addEventListener('hashchange',()=>go(location.hash.slice(1)));
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{drawField();renderPins()},200)});
+
+drawField();renderAll();go(location.hash.slice(1)||'overview');setSync(ckey?'saving':'local');pull();
+}
+</script>
+</body>
+</html>
