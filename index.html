@@ -67,6 +67,28 @@ h1{font:400 clamp(40px,10vw,56px)/1 'Instrument Serif',serif;margin:34px 0 4px}
 .catpick{display:flex;flex-wrap:wrap;gap:6px}
 .catpick button{border:1px solid var(--line);background:none;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;color:var(--mute)}
 .catpick button.on{background:var(--c);color:#132015;border-color:transparent}
+.media{display:grid;gap:8px}
+.media h4{margin:4px 0 0;font-size:13px;color:var(--mute);font-weight:700;display:flex;justify-content:space-between}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.th{position:relative;width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--soft);border:1px solid var(--line);flex:none}
+.th img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.th .x{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:13px;line-height:1;display:grid;place-items:center;padding:0}
+.th.up{display:grid;place-items:center}
+.th.up::after{content:"";width:22px;height:22px;border-radius:50%;border:2px solid var(--gold);border-top-color:transparent;animation:spin .7s linear infinite}
+.addimg{width:64px;height:64px;border-radius:12px;border:1px dashed rgba(255,255,255,.25);background:none;color:var(--mute);font-size:24px;display:grid;place-items:center;cursor:pointer}
+.links{display:grid;gap:6px}
+.lk{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:12px;padding:6px 6px 6px 12px;font-size:14px}
+.lk a{flex:1;color:var(--gold);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lk button{border:0;background:none;color:var(--dim);width:30px;height:30px;font-size:15px}
+.linkadd{display:flex;gap:6px}
+.linkadd .in{flex:1}
+.mini{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.mini img{width:42px;height:42px;border-radius:9px;object-fit:cover;cursor:zoom-in;border:1px solid var(--line)}
+.mini a{font-size:12.5px;font-weight:700;color:var(--gold);background:rgba(239,197,107,.12);padding:4px 10px;border-radius:999px;text-decoration:none;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb{position:fixed;inset:0;z-index:60;background:rgba(4,8,5,.92);display:grid;place-items:center;padding:16px;opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.lb.on{opacity:1;visibility:visible;transition:opacity .3s}
+.lb img{max-width:100%;max-height:86vh;border-radius:16px}
+.lb button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:20px}
 .group{margin-top:16px}
 .group h3{font-size:14px;color:var(--gold);margin:0 0 8px}
 .chk{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-radius:16px;background:var(--glass);border:1px solid var(--line);margin-bottom:6px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -183,6 +205,8 @@ textarea.in{min-height:76px;resize:vertical}
   <div class="acts"><button class="btn red" id="logout">Lock</button><button class="btn" id="closeSheet">Close</button></div>
   <div class="acts" style="border-top:1px solid var(--line);padding-top:10px"><button class="btn" id="newBiz">+ New business</button><button class="btn red" id="delBiz">Delete this business</button></div>
 </div>
+<div class="lb" id="lb" role="dialog" aria-label="Photo"><img id="lbImg" alt=""><button id="lbClose" aria-label="Close">✕</button></div>
+<input type="file" id="imgFile" accept="image/*" multiple hidden>
 <div class="toast" id="toast"><span id="toastTxt"></span><button id="toastBtn">Undo</button></div>
 
 <script>
@@ -267,6 +291,20 @@ function lock(msg){ckey='';try{localStorage.removeItem('orchard.key')}catch(e){}
 $('#gateForm').addEventListener('submit',async e=>{e.preventDefault();const v=$('#pass').value.trim().toLowerCase();if(!v)return;$('#gateErr').textContent='Opening…';const r=await unlock(v);if(r==='ok'){$('#pass').value='';$('#gateErr').textContent='';$('#gate').classList.add('off');render()}else{$('#gateErr').textContent=r==='bad'?'Wrong password.':'Can\'t connect. Check your internet.';const f=$('#gateForm');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake')}});
 document.addEventListener('focusout',()=>setTimeout(()=>{if(later&&!editing()){later=false;render()}},50));
 
+/* photos & links */
+const MAXIMG=5,uploading={};
+const imgSrc=p=>`/api/img?p=${encodeURIComponent(p)}&k=${encodeURIComponent(ckey)}`;
+const host=u=>{try{const x=new URL(u);return (x.hostname.replace(/^www\./,'')+x.pathname).replace(/\/$/,'')}catch(e){return u}};
+const safeUrl=u=>{u=String(u||'').trim();if(!u)return'';if(!/^https?:\/\//i.test(u))u='https://'+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:''}catch(e){return''}};
+async function shrink(file){const bmp=await createImageBitmap(file);const k=Math.min(1,1400/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);const url=c.toDataURL('image/jpeg',.82);return url.split(',')[1]}
+async function addPhotos(i,files){if(!ckey){toast('Open the app with the password first.');return}const room=MAXIMG-(i.imgs||[]).length-(uploading[i.id]||0);const list=[...files].filter(f=>/^image\//.test(f.type)).slice(0,Math.max(0,room));if(files.length>list.length)toast(`Max ${MAXIMG} photos per idea.`);
+ for(const f of list){uploading[i.id]=(uploading[i.id]||0)+1;render();try{const data=await shrink(f);const r=await fetch('/api/img',{method:'POST',headers:{'x-orchard-key':ckey,'content-type':'application/json'},body:JSON.stringify({data})});if(!r.ok)throw 0;const {path}=await r.json();i.imgs=[...(i.imgs||[]),path].slice(0,MAXIMG);touch(i);save(true)}catch(e){toast('A photo could not be uploaded. Try a JPG or PNG.')}finally{uploading[i.id]--;render()}}}
+function delPhoto(i,p){i.imgs=(i.imgs||[]).filter(x=>x!==p);touch(i);save(true);render();fetch('/api/img?p='+encodeURIComponent(p),{method:'DELETE',headers:{'x-orchard-key':ckey}}).catch(()=>{})}
+function mediaEdit(i){const imgs=i.imgs||[],up=uploading[i.id]||0,links=i.links||[];
+ return `<div class="media"><h4><span>Photos</span><span>${imgs.length+up}/${MAXIMG}</span></h4><div class="thumbs">${imgs.map(p=>`<div class="th"><img src="${esc(imgSrc(p))}" data-zoom="${esc(p)}" alt="" loading="lazy"><button class="x" data-delimg="${esc(p)}" aria-label="Remove photo">✕</button></div>`).join('')}${'<div class="th up"></div>'.repeat(up)}${imgs.length+up<MAXIMG?'<button class="addimg" data-addimg aria-label="Add photos">+</button>':''}</div>
+ <h4><span>Links</span></h4><div class="links">${links.map((u,n)=>`<div class="lk"><a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(host(u))}</a><button data-dellink="${n}" aria-label="Remove link">✕</button></div>`).join('')}<form class="linkadd" data-linkform><input class="in" name="u" type="text" inputmode="url" autocapitalize="off" autocomplete="off" placeholder="Paste a link (Instagram, website…)" aria-label="Link"><button class="btn" type="submit">Add</button></form></div></div>`}
+function mediaMini(i){const imgs=i.imgs||[],links=i.links||[];if(!imgs.length&&!links.length)return'';return `<div class="mini">${imgs.map(p=>`<img src="${esc(imgSrc(p))}" data-zoom="${esc(p)}" alt="" loading="lazy">`).join('')}${links.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">🔗 ${esc(host(u))}</a>`).join('')}</div>`}
+
 /* render */
 function render(){
  const f=field(),L=mine(),P=L.filter(i=>i.harvest);
@@ -287,7 +325,7 @@ function render(){
  const show=(tab==='picked'?P:L).filter(i=>!catF||i.cat===catF).slice().sort((a,b)=>b.harvest-a.harvest||b.stars-a.stars||b.created-a.created);
  $('#list').innerHTML=show.map((i,k)=>{const open=openId===i.id;return `<article class="idea${i.harvest?' pk':''}${newId===i.id?' new':''}" data-id="${esc(i.id)}" style="animation-delay:${Math.min(k,10)*35}ms">
   <div class="row"><button class="title" data-open>${esc(i.title)}</button><button class="pick${i.harvest?' on':''}" data-pick aria-label="Pick">✓</button></div>
-  ${open?`<div class="edit"><div class="catpick">${Object.entries(CATS).map(([k,[n,c]])=>`<button data-setcat="${k}" class="${i.cat===k?'on':''}" style="--c:${c}">${n}</button>`).join('')}</div><input class="in" data-f="title" value="${esc(i.title)}" aria-label="Title"><textarea class="in" data-f="note" placeholder="A few words about it…" aria-label="Note">${esc(i.note)}</textarea><div class="acts"><button class="btn red" data-del>Delete</button><button class="btn gold" data-open>Done</button></div></div>`:(i.note?`<p class="note" data-open>${esc(i.note)}</p>`:'')}
+  ${open?`<div class="edit"><div class="catpick">${Object.entries(CATS).map(([k,[n,c]])=>`<button data-setcat="${k}" class="${i.cat===k?'on':''}" style="--c:${c}">${n}</button>`).join('')}</div><input class="in" data-f="title" value="${esc(i.title)}" aria-label="Title"><textarea class="in" data-f="note" placeholder="A few words about it…" aria-label="Note">${esc(i.note)}</textarea>${mediaEdit(i)}<div class="acts"><button class="btn red" data-del>Delete</button><button class="btn gold" data-open>Done</button></div></div>`:(i.note?`<p class="note" data-open>${esc(i.note)}</p>`:'')+mediaMini(i)}
   <div class="sr"><span class="ctag" style="--c:${CATS[i.cat][1]}">${CATS[i.cat][0]}</span><div class="stars">${[1,2,3,4,5].map(n=>`<button data-star="${n}" class="${i.stars>=n?'on':''}" aria-label="${n} stars">★</button>`).join('')}</div></div></article>`}).join('')||`<p class="empty">${catF?'No ideas in this category yet.':tab==='picked'?'Nothing picked yet. Tap ✓ on your favourite ideas.':'No ideas yet. Drop your first one above.'}</p>`;
  newId=null;
 }
@@ -299,6 +337,11 @@ let tT,tFn;function toast(m,btn,fn){$('#toastTxt').textContent=m;$('#toastBtn').
 $('#addForm').addEventListener('submit',e=>{e.preventDefault();const v=$('#newIdea').value.trim();if(!v)return;const i=touch({id:uid(),field:field().id,title:v,note:'',stars:3,cat:catF||guess(v),harvest:false,created:now()});S.ideas.push(i);newId=i.id;setTab('all');$('#newIdea').value='';save();render()});
 document.addEventListener('click',e=>{
  const t=e.target,card=t.closest('.idea'),i=card&&S.ideas.find(x=>x.id===card.dataset.id);
+ const zm=t.closest('[data-zoom]');if(zm){$('#lbImg').src=imgSrc(zm.dataset.zoom);$('#lb').classList.add('on');return}
+ if(t.closest('#lbClose')||t.id==='lb'){$('#lb').classList.remove('on');return}
+ if(i&&t.closest('[data-addimg]')){pickFor=i;$('#imgFile').value='';$('#imgFile').click();return}
+ const di=t.closest('[data-delimg]');if(i&&di){delPhoto(i,di.dataset.delimg);return}
+ const dl=t.closest('[data-dellink]');if(i&&dl){i.links=(i.links||[]).filter((_,n)=>n!==+dl.dataset.dellink);touch(i);save(true);render();return}
  const sc=t.closest('[data-setcat]');if(i&&sc){i.cat=sc.dataset.setcat;touch(i);save();render();return}
  const cf=t.closest('[data-catf]');if(cf){catF=catF===cf.dataset.catf?'':cf.dataset.catf;if(tab==='open')setTab('all');render();return}
  const ch=t.closest('[data-chk]');if(ch){const f=field().id;S.checks[f]=S.checks[f]||{};if(pend.has(ch.dataset.chk))return;S.checks[f][ch.dataset.chk]={v:!isOn(S.checks[f][ch.dataset.chk]),u:now()};if(ckey)pend.add(ch.dataset.chk);save(true);render();return}
@@ -316,6 +359,9 @@ document.addEventListener('click',e=>{
  if(t.closest('#delBiz')){if(S.fields.length<2){toast('Keep at least one business.');return}const f=field(),gone=S.ideas.filter(x=>x.field===f.id),ts=now();gone.forEach(x=>S.del[x.id]=ts);S.del[f.id]=ts;S.ideas=S.ideas.filter(x=>x.field!==f.id);S.fields=S.fields.filter(x=>x!==f);setCur(S.fields[0].id);save();render();$('#sheet').classList.remove('on');toast(`Deleted “${f.name}”.`,'Undo',()=>{[f,...gone].forEach(x=>{delete S.del[x.id];touch(x)});S.fields.push(f);S.ideas.push(...gone);setCur(f.id);save();render()});return}
  if(t.closest('#name'))renameBiz();
 });
+let pickFor=null;
+$('#imgFile').addEventListener('change',e=>{if(pickFor&&e.target.files.length)addPhotos(pickFor,e.target.files)});
+document.addEventListener('submit',e=>{const f=e.target.closest('[data-linkform]');if(!f)return;e.preventDefault();const card=f.closest('.idea'),i=card&&S.ideas.find(x=>x.id===card.dataset.id);if(!i)return;const u=safeUrl(f.u.value);if(!u){toast('That link does not look right.');return}if((i.links||[]).length>=10){toast('Max 10 links.');return}i.links=[...(i.links||[]),u];touch(i);save(true);render();document.querySelector(`.idea[data-id="${CSS.escape(i.id)}"] [data-linkform] input`)?.focus()});
 function setTab(v){tab=v;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===v))}
 document.addEventListener('keydown',e=>{const c=e.target.closest&&e.target.closest('[data-chk]');if(c&&(e.key===' '||e.key==='Enter')){e.preventDefault();c.click()}});
 function renameBiz(){const h=$('#name');h.contentEditable='true';h.focus();const r=document.createRange();r.selectNodeContents(h);const s=getSelection();s.removeAllRanges();s.addRange(r)}
@@ -324,7 +370,8 @@ $('#name').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault()
 $('#name').title='Tap to rename';
 document.addEventListener('input',e=>{const t=e.target,card=t.closest('.idea');if(!card||!t.dataset.f)return;const i=S.ideas.find(x=>x.id===card.dataset.id);if(!i)return;i[t.dataset.f]=t.value;touch(i);if(t.dataset.f==='title')card.querySelector('.title').textContent=t.value;save()});
 $('#biz').addEventListener('change',e=>{setCur(e.target.value);openId=null;render()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){openId=null;later=false;$('#sheet').classList.remove('on');render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#lb').classList.contains('on')){$('#lb').classList.remove('on');return}
+ if(e.key==='Escape'){openId=null;later=false;$('#sheet').classList.remove('on');render()}});
 
 /* background field */
 function drawBg(){const c=$('#bg'),W=innerWidth,H=innerHeight,d=Math.min(devicePixelRatio||1,2);c.width=W*d;c.height=H*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);let s=4321;const r=()=>(s=s*16807%2147483647)/2147483647;
